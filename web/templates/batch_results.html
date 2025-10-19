@@ -281,9 +281,20 @@
 </head>
 <body>
     <div class="container">
-        <a href="{{ url_for('index') }}" class="back-link">
-            ← Back to Home
-        </a>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+            <a href="{{ url_for('index') }}" class="back-link" style="margin: 0;">
+                🏠 Home
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="back-link" style="margin: 0;">
+                📊 Dashboard
+            </a>
+            <a href="{{ url_for('view_reports') }}" class="back-link" style="margin: 0;">
+                📋 View All Reports
+            </a>
+            <a href="/competitor-analysis" class="back-link" style="margin: 0;">
+                🎯 Competitors
+            </a>
+        </div>
         
         <div class="header">
             <h1>🎉 Batch Reports Generated!</h1>
