@@ -315,7 +315,7 @@
                         <div class="upload-icon">📁</div>
                         <div class="upload-text">Drop multiple files here or click to browse</div>
                         <div class="upload-subtext">Supports CSV, XLSX, DOCX, PDF, Images (JPG, PNG)</div>
-                        <input type="file" id="file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="addSingleFiles(this)">
+                        <input type="file" id="file-input" name="files-temp" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="addSingleFiles(this)">
                     </div>
                     
                     <div id="single-file-list" class="file-list" style="display: none;">
@@ -349,7 +349,7 @@
                         <div class="upload-icon">📁</div>
                         <div class="upload-text">Drop multiple files here or click to browse</div>
                         <div class="upload-subtext">Select 2-20 files (CSV, XLSX, DOCX, PDF, Images)</div>
-                        <input type="file" id="batch-file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="addBatchFiles(this)">
+                        <input type="file" id="batch-file-input" name="files-temp" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="addBatchFiles(this)">
                     </div>
                     
                     <div id="file-list" class="file-list" style="display: none;">
@@ -550,52 +550,74 @@
         
         // Handle form submission for single upload
         document.querySelector('#single-tab form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             if (singleSelectedFiles.length === 0) {
-                e.preventDefault();
                 alert('Please select at least one file');
                 return;
             }
             
-            // Create a DataTransfer to hold files
-            const dt = new DataTransfer();
-            singleSelectedFiles.forEach(file => dt.items.add(file));
+            // Create FormData with all form fields and files
+            const formData = new FormData(this);
             
-            // Create or update the file input
-            let fileInput = this.querySelector('input[name="files"]');
-            if (!fileInput) {
-                fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.name = 'files';
-                fileInput.multiple = true;
-                fileInput.style.display = 'none';
-                this.appendChild(fileInput);
-            }
-            fileInput.files = dt.files;
+            // Remove temp file input data
+            formData.delete('files-temp');
+            
+            // Add all selected files
+            singleSelectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+            
+            // Submit via fetch
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = response.url;
+                } else {
+                    alert('Upload failed. Please try again.');
+                }
+            }).catch(error => {
+                console.error('Upload error:', error);
+                alert('Upload failed. Please try again.');
+            });
         });
         
         // Handle form submission for batch upload
         document.querySelector('#batch-tab form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             if (selectedFiles.length === 0) {
-                e.preventDefault();
                 alert('Please select at least one file');
                 return;
             }
             
-            // Create a DataTransfer to hold files
-            const dt = new DataTransfer();
-            selectedFiles.forEach(file => dt.items.add(file));
+            // Create FormData with all form fields and files
+            const formData = new FormData(this);
             
-            // Create or update the file input
-            let fileInput = this.querySelector('input[name="files"]');
-            if (!fileInput) {
-                fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.name = 'files';
-                fileInput.multiple = true;
-                fileInput.style.display = 'none';
-                this.appendChild(fileInput);
-            }
-            fileInput.files = dt.files;
+            // Remove temp file input data
+            formData.delete('files-temp');
+            
+            // Add all selected files
+            selectedFiles.forEach(file => {
+                formData.append('files', file);
+            });
+            
+            // Submit via fetch
+            fetch(this.action, {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    window.location.href = response.url;
+                } else {
+                    alert('Upload failed. Please try again.');
+                }
+            }).catch(error => {
+                console.error('Upload error:', error);
+                alert('Upload failed. Please try again.');
+            });
         });
         
         // Drag and drop for single upload
