@@ -1,0 +1,26 @@
+source_url,target_url,anchor_text,domain_authority,spam_score,link_type,first_seen,status
+https://www.industry-directory.com/listings/sample-company,/,Sample Company,72,2,dofollow,2024-01-15,active
+https://www.business-listings.com/sample-company,/,Professional Services,45,5,dofollow,2024-02-20,active
+https://www.yellowpages.com/sample-company,/,Sample Company Directory,58,3,dofollow,2024-01-10,active
+https://www.local-business.com/sample-company,/,sample company,52,4,dofollow,2024-03-05,active
+https://www.business-finder.com/sample-company,/,Quality Services Provider,38,8,dofollow,2024-02-12,active
+https://www.localsearch.com/sample-company,/,Sample Company,48,3,dofollow,2024-01-22,active
+https://www.directory-site.net/sample-company,/,professional services,35,12,dofollow,2024-03-18,active
+https://www.business-directory.com/sample-company,/,Sample Company,42,6,dofollow,2024-02-28,active
+https://industry-directory.com/sample-company,/services/,our services,28,15,dofollow,2024-03-22,active
+https://www.review-site.com/sample-company,/,Sample Company Reviews,65,2,nofollow,2024-01-18,active
+https://www.google.com/maps/sample-company,/,Sample Company,85,1,nofollow,2024-01-08,active
+https://www.social-media.com/samplecompany,/,sample company,78,1,nofollow,2024-01-12,active
+https://business-directory.com/sample-company,/,business services,32,18,dofollow,2024-04-02,active
+https://www.business-hub.com/sample-company,/,Professional Services,41,7,dofollow,2024-02-15,active
+https://industry-blog.net/best-service-providers,/,top service providers,55,4,dofollow,2024-03-10,active
+https://www.local-business-directory.com/sample-company,/,Sample Company,44,5,dofollow,2024-02-22,active
+https://www.business-list.com/sample-company,/,service provider,38,9,dofollow,2024-03-15,active
+https://old-directory-site.com/sample-company,/,click here,25,35,dofollow,2023-12-05,lost
+https://removed-blog.com/business-listings,/services/,service provider,18,42,dofollow,2023-11-20,lost
+https://www.industry-magazine.com/interview-sample-company,/about-us/,Sample Company,68,2,dofollow,2024-03-25,active
+https://local-business-news.com/sample-company,/,Local Business,51,3,dofollow,2024-04-01,active
+https://www.bbb.org/sample-company,/,Sample Company BBB,71,2,dofollow,2024-02-18,active
+https://expired-domain.com/links/sample-company,/,sample company,12,48,dofollow,2023-10-15,broken
+https://www.reviews-site.com/sample-company,/testimonials/,customer reviews,62,3,dofollow,2024-03-12,active
+https://www.industry-partners.com/members/sample-company,/,member directory,54,4,dofollow,2024-02-25,active

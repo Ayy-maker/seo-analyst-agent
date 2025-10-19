@@ -1,0 +1,281 @@
+{
+  "generated_at": "2025-10-18T17:37:32.201665",
+  "total_insights": 14,
+  "by_severity": {
+    "high": 7,
+    "medium": 4,
+    "low": 3
+  },
+  "by_module": {
+    "backlinks": 3,
+    "onpage": 3,
+    "keywords": 1,
+    "technical": 5,
+    "traffic": 2
+  },
+  "insights": [
+    {
+      "id": "backlinks_high_authority_20251018173732",
+      "module": "backlinks",
+      "category": "link_quality",
+      "severity": "low",
+      "finding": "Acquired 12 high-authority backlinks (DA 50+)",
+      "affected_items": [
+        "https://www.carsales.com.au/directory/instant-auto-traders",
+        "https://www.yellowpages.com.au/nsw/instant-auto-traders",
+        "https://www.truelocal.com.au/business/instant-auto-traders",
+        "https://www.yelp.com.au/biz/instant-auto-traders-sydney",
+        "https://www.google.com/maps/instant-auto-traders",
+        "https://www.facebook.com/instantautotraders",
+        "https://automotive-blog.net/best-car-buyers-sydney",
+        "https://www.credible-auto-mag.com/interview-instant-auto-traders",
+        "https://sydney-local-news.com.au/business/instant-auto-traders",
+        "https://www.bbb.org/au/instant-auto-traders"
+      ],
+      "metrics": {
+        "count": 12,
+        "percentage": 48.0,
+        "avg_da": 64.2
+      },
+      "recommendation": "Excellent work! Continue building relationships with high-authority domains. Monitor these links for status changes and explore opportunities for additional placements on these domains."
+    },
+    {
+      "id": "backlinks_lost_links_20251018173732",
+      "module": "backlinks",
+      "category": "link_status",
+      "severity": "high",
+      "finding": "3 backlinks recently lost or broken",
+      "affected_items": [
+        "https://old-directory-site.com/instant-auto-traders",
+        "https://removed-blog.com/sydney-car-dealers",
+        "https://expired-domain.com/links/instant-auto-traders"
+      ],
+      "metrics": {
+        "lost_count": 3,
+        "percentage": 12.0
+      },
+      "recommendation": "Investigate lost backlinks and reach out to webmasters to restore them. Set up 301 redirects for broken target URLs. Monitor backlink health monthly to minimize losses."
+    },
+    {
+      "id": "backlinks_toxic_links_20251018173732",
+      "module": "backlinks",
+      "category": "toxic_links",
+      "severity": "high",
+      "finding": "3 potentially toxic backlinks detected (spam score >30)",
+      "affected_items": [
+        "https://old-directory-site.com/instant-auto-traders",
+        "https://removed-blog.com/sydney-car-dealers",
+        "https://expired-domain.com/links/instant-auto-traders"
+      ],
+      "metrics": {
+        "toxic_count": 3,
+        "avg_spam_score": 41.7,
+        "percentage": 12.0
+      },
+      "recommendation": "Review toxic backlinks immediately. Create a disavow file for harmful links and submit to Google Search Console. Monitor regularly for new toxic links and take proactive action."
+    },
+    {
+      "id": "onpage_meta_missing_20251018173732",
+      "module": "onpage",
+      "category": "metadata",
+      "severity": "high",
+      "finding": "3 pages missing meta descriptions",
+      "affected_items": [
+        "/about-us/",
+        "/blog/selling-damaged-cars/",
+        "/pricing-guide/"
+      ],
+      "metrics": {
+        "count": 3
+      },
+      "recommendation": "Write compelling meta descriptions (120-160 characters) for all pages. Include target keywords and clear CTAs to improve click-through rates."
+    },
+    {
+      "id": "onpage_thin_content_20251018173732",
+      "module": "onpage",
+      "category": "content",
+      "severity": "medium",
+      "finding": "1 pages with thin content (<300 words)",
+      "affected_items": [
+        "/instant-quote/"
+      ],
+      "metrics": {
+        "count": 1,
+        "avg_words": 280.0
+      },
+      "recommendation": "Expand content to at least 500-800 words. Add valuable information, FAQs, examples, and supporting details to increase relevance and engagement."
+    },
+    {
+      "id": "onpage_missing_alt_20251018173732",
+      "module": "onpage",
+      "category": "images",
+      "severity": "medium",
+      "finding": "12 images missing alt text across 7 pages",
+      "affected_items": [
+        "/",
+        "/sell-your-4wd-sydney/",
+        "/about-us/",
+        "/blog/how-to-sell-car-quickly/",
+        "/blog/selling-damaged-cars/",
+        "/areas-we-service/",
+        "/pricing-guide/"
+      ],
+      "metrics": {
+        "total_images_no_alt": 12,
+        "pages_affected": 7
+      },
+      "recommendation": "Add descriptive alt text to all images for accessibility and SEO. Include relevant keywords naturally while describing the image content."
+    },
+    {
+      "id": "kw_top_20251018173732",
+      "module": "keywords",
+      "category": "top_performers",
+      "severity": "low",
+      "finding": "Identified 10 top-performing keywords",
+      "affected_items": [
+        "meta tags",
+        "seo tools",
+        "seo strategy",
+        "on page seo",
+        "content optimization",
+        "seo audit",
+        "mobile seo",
+        "keyword research",
+        "schema markup",
+        "local seo"
+      ],
+      "metrics": {
+        "count": 10,
+        "avg_position": 6.35,
+        "total_clicks": 565
+      },
+      "recommendation": "Monitor these keywords closely and create supporting content to maintain rankings."
+    },
+    {
+      "id": "tech_errors_20251018173732",
+      "module": "technical",
+      "category": "crawl_errors",
+      "severity": "high",
+      "finding": "Found 2 pages with errors",
+      "affected_items": [
+        "/blog/post-3",
+        "/test-page"
+      ],
+      "metrics": {
+        "4xx_errors": 1,
+        "5xx_errors": 1,
+        "total_errors": 2
+      },
+      "recommendation": "Fix 404 errors with redirects or restore content. Resolve 5xx server errors immediately as they impact crawling."
+    },
+    {
+      "id": "tech_indexability_20251018173732",
+      "module": "technical",
+      "category": "indexation_errors",
+      "severity": "high",
+      "finding": "1 important pages are non-indexable",
+      "affected_items": [
+        "/products"
+      ],
+      "metrics": {
+        "count": 1
+      },
+      "recommendation": "Review robots.txt, meta robots, and X-Robots-Tag headers. Ensure important content is indexable."
+    },
+    {
+      "id": "tech_cwv_20251018173732",
+      "module": "technical",
+      "category": "core_web_vitals",
+      "severity": "high",
+      "finding": "6 pages failing Core Web Vitals",
+      "affected_items": [
+        "/services",
+        "/blog",
+        "/blog/post-2",
+        "/products/item-1",
+        "/deep/nested/page",
+        "/another/deep/page"
+      ],
+      "metrics": {
+        "poor_lcp": 6,
+        "poor_fid": 0,
+        "poor_cls": 5,
+        "total": 6
+      },
+      "recommendation": "Optimize images, reduce JavaScript, improve server response time. Focus on LCP, FID, and CLS improvements."
+    },
+    {
+      "id": "tech_speed_20251018173732",
+      "module": "technical",
+      "category": "page_speed",
+      "severity": "medium",
+      "finding": "1 pages with slow load times",
+      "affected_items": [
+        "/blog/post-2"
+      ],
+      "metrics": {
+        "count": 1,
+        "avg_load_time": 3.2
+      },
+      "recommendation": "Implement caching, compress images, minify CSS/JS. Target load time under 3 seconds."
+    },
+    {
+      "id": "tech_crawl_depth_20251018173732",
+      "module": "technical",
+      "category": "crawl_depth",
+      "severity": "medium",
+      "finding": "2 pages with deep crawl depth (>3 clicks)",
+      "affected_items": [
+        "/deep/nested/page",
+        "/another/deep/page"
+      ],
+      "metrics": {
+        "count": 2,
+        "avg_depth": 4.5
+      },
+      "recommendation": "Improve internal linking structure. Important pages should be within 3 clicks from homepage."
+    },
+    {
+      "id": "traffic_top_pages_20251018173732",
+      "module": "traffic",
+      "category": "landing_pages",
+      "severity": "low",
+      "finding": "Top 10 landing pages driving 5969 sessions",
+      "affected_items": [
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown",
+        "unknown"
+      ],
+      "metrics": {
+        "total_sessions": 5969,
+        "avg_sessions": 597.0,
+        "top_page_sessions": 1245
+      },
+      "recommendation": "Focus optimization efforts on top-performing pages. Test different CTAs, improve content depth, add internal links to related products/services, and optimize for featured snippets."
+    },
+    {
+      "id": "traffic_high_bounce_20251018173732",
+      "module": "traffic",
+      "category": "user_engagement",
+      "severity": "high",
+      "finding": "3 pages with high bounce rate (>70%)",
+      "affected_items": [
+        "unknown",
+        "unknown",
+        "unknown"
+      ],
+      "metrics": {
+        "count": 3,
+        "avg_bounce_rate": 72.6
+      },
+      "recommendation": "Improve page content relevance, add engaging media (videos, images), create compelling CTAs, improve page load speed, and ensure content matches search intent. Target bounce rate under 50%."
+    }
+  ]
+}

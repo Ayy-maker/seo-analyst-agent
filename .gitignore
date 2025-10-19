@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+.venv
+
+# Environment
+.env
+.env.local
+config/env.local.json
+
+# Database (Phase 4)
+database/seo_data.db
+database/*.db
+*.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Outputs (optional - uncomment to ignore)
+# outputs/pdf-reports/*.pdf
+# outputs/summaries/*.md
+# outputs/action-plans/*.md
+# outputs/dashboards/*.json
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+.cache/
+
+# Client Data - Private
+uploads/
+database/seo_data.db
+database/seo_analytics.db
+outputs/pdf-reports/*.pdf
+*.db-journal
+
+# Backup files
+*.backup
+*.bak
+web/app.py.backup
+web/app_batch_new.py
+outputs/html-reports/*.html

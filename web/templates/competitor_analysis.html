@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitor Analysis - SEO Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin: 20px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .info-box {
+            background: #e0e7ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            color: #3730a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Competitor Analysis</h1>
+            <p>Track and analyze your competitors</p>
+            
+            <div class="nav-links">
+                <a href="/">🏠 Home</a>
+                <a href="/dashboard">📊 Dashboard</a>
+                <a href="/competitor-analysis">🎯 Competitors</a>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #1e293b;">Add Competitor</h2>
+            
+            <div class="info-box">
+                <strong>📌 Coming Soon!</strong><br>
+                Add competitor domains and track their SEO performance against your clients.
+                Features include:
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>Keyword comparison and gap analysis</li>
+                    <li>Ranking tracking across competitors</li>
+                    <li>Backlink comparison</li>
+                    <li>Content strategy insights</li>
+                </ul>
+            </div>
+            
+            <form method="POST" action="/competitor-analysis">
+                <div class="form-group">
+                    <label for="client_id">Select Client</label>
+                    <select name="client_id" id="client_id" required>
+                        <option value="">Choose a client...</option>
+                        {% for client in clients %}
+                        <option value="{{ client.id }}">{{ client.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="competitor_domain">Competitor Domain</label>
+                    <input type="text" name="competitor_domain" id="competitor_domain" 
+                           placeholder="e.g., competitor.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="competitor_name">Competitor Name (Optional)</label>
+                    <input type="text" name="competitor_name" id="competitor_name" 
+                           placeholder="e.g., Competitor Inc.">
+                </div>
+                
+                <button type="submit" class="btn">Add Competitor</button>
+            </form>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 20px; color: #1e293b;">Your Competitors ({{ competitors|length }})</h2>
+            
+            {% if competitors and competitors|length > 0 %}
+                <div style="margin-top: 20px;">
+                    {% for comp in competitors %}
+                    <div style="background: #f7fafc; padding: 20px; margin: 15px 0; border-radius: 12px; border-left: 4px solid #ef4444;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">
+                                    🎯 {{ comp['competitor_name'] }}
+                                </div>
+                                <div style="color: #64748b; font-size: 14px;">
+                                    Domain: {{ comp['competitor_domain'] }} • 
+                                    Client: {{ comp.get('client_name', 'Unknown') }} •
+                                    Added: {{ comp['added_at'][:10] }}
+                                </div>
+                            </div>
+                            <div>
+                                <a href="/competitor/{{ comp['id'] }}/analyze" class="btn" style="font-size: 14px; padding: 10px 20px;">
+                                    Analyze
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="text-align: center; color: #64748b; padding: 40px;">
+                    No competitors added yet. Add your first competitor above!
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

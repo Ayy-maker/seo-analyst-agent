@@ -1,0 +1,68 @@
+{
+  "client_name": "Your Client Company Name",
+  "report_period": "Monthly Report - October 2025",
+  "report_date": "auto",
+  
+  "branding": {
+    "logo_path": null,
+    "primary_color": "#667eea",
+    "secondary_color": "#764ba2",
+    "accent_color": "#48bb78"
+  },
+  
+  "report_settings": {
+    "include_executive_summary": true,
+    "include_health_score": true,
+    "include_kpi_dashboard": true,
+    "include_module_reports": true,
+    "include_recommendations": true,
+    "include_performance_insights": true
+  },
+  
+  "modules": {
+    "keywords": {
+      "enabled": true,
+      "top_count": 10,
+      "min_impressions": 10
+    },
+    "technical": {
+      "enabled": true,
+      "priority_issues": ["indexation", "core_web_vitals", "errors"]
+    },
+    "onpage": {
+      "enabled": true,
+      "check_metadata": true,
+      "check_content_quality": true,
+      "check_images": true
+    },
+    "backlinks": {
+      "enabled": true,
+      "toxic_threshold": 30,
+      "min_domain_authority": 20
+    },
+    "traffic": {
+      "enabled": true,
+      "bounce_rate_threshold": 70,
+      "conversion_tracking": true
+    }
+  },
+  
+  "thresholds": {
+    "ranking_drop_alert": 5,
+    "traffic_drop_percent": 20,
+    "error_spike_threshold": 50,
+    "toxic_backlink_score": 30,
+    "low_ctr_threshold": 2.0,
+    "bounce_rate_warning": 70,
+    "page_speed_slow": 3.0
+  },
+  
+  "output": {
+    "pdf_filename": "auto",
+    "save_markdown": true,
+    "save_json": true,
+    "archive_reports": true
+  },
+  
+  "notes": "This is a template. Copy and customize for each client."
+}

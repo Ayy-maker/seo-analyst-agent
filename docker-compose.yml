@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  seo-analyst:
+    build: .
+    container_name: seo-analyst
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      # Mount data directory for input reports
+      - ./data:/app/data
+      # Mount outputs directory to persist results
+      - ./outputs:/app/outputs
+      # Optionally mount config for custom settings
+      - ./config:/app/config
+    command: python main.py analyze --reports data/*.csv
+    restart: "no"
+
+  # Optional: Development container with interactive shell
+  seo-analyst-dev:
+    build: .
+    container_name: seo-analyst-dev
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - .:/app
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    profiles:
+      - dev

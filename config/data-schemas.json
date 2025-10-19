@@ -1,0 +1,107 @@
+{
+  "schemas": {
+    "keywords": {
+      "description": "Keyword performance data from Search Console or rank tracking tools",
+      "fields": {
+        "query": "string",
+        "position": "number",
+        "previous_position": "number",
+        "impressions": "number",
+        "clicks": "number",
+        "ctr": "number",
+        "url": "string",
+        "date": "YYYY-MM-DD"
+      },
+      "sources": ["Google Search Console", "SEMrush", "Ahrefs", "Moz"]
+    },
+    "technical": {
+      "description": "Technical SEO audit data",
+      "fields": {
+        "url": "string",
+        "status_code": "number",
+        "indexability": "boolean",
+        "crawl_depth": "number",
+        "page_size": "number",
+        "load_time": "number",
+        "lcp": "number",
+        "fid": "number",
+        "cls": "number",
+        "mobile_friendly": "boolean",
+        "issues": "array",
+        "date": "YYYY-MM-DD"
+      },
+      "sources": ["Screaming Frog", "Sitebulb", "Google PageSpeed Insights", "Search Console"]
+    },
+    "onpage": {
+      "description": "On-page SEO elements",
+      "fields": {
+        "url": "string",
+        "title": "string",
+        "title_length": "number",
+        "meta_description": "string",
+        "meta_description_length": "number",
+        "h1": "string",
+        "h1_count": "number",
+        "word_count": "number",
+        "schema_types": "array",
+        "internal_links": "number",
+        "external_links": "number",
+        "images": "number",
+        "images_without_alt": "number",
+        "date": "YYYY-MM-DD"
+      },
+      "sources": ["Screaming Frog", "Sitebulb", "Custom crawlers"]
+    },
+    "backlinks": {
+      "description": "Backlink profile data",
+      "fields": {
+        "source_url": "string",
+        "target_url": "string",
+        "anchor_text": "string",
+        "domain_rating": "number",
+        "url_rating": "number",
+        "traffic": "number",
+        "link_type": "dofollow|nofollow",
+        "first_seen": "YYYY-MM-DD",
+        "last_seen": "YYYY-MM-DD",
+        "status": "new|active|lost",
+        "spam_score": "number"
+      },
+      "sources": ["Ahrefs", "Majestic", "Moz", "SEMrush"]
+    },
+    "traffic": {
+      "description": "Traffic and conversion data",
+      "fields": {
+        "date": "YYYY-MM-DD",
+        "url": "string",
+        "sessions": "number",
+        "users": "number",
+        "pageviews": "number",
+        "bounce_rate": "number",
+        "avg_session_duration": "number",
+        "conversions": "number",
+        "conversion_rate": "number",
+        "source": "string",
+        "medium": "string",
+        "device_category": "desktop|mobile|tablet"
+      },
+      "sources": ["Google Analytics 4", "Google Analytics Universal"]
+    }
+  },
+  "mapping_rules": {
+    "csv_column_aliases": {
+      "query": ["Query", "Keyword", "Search Term", "query"],
+      "position": ["Position", "Rank", "Average Position", "position", "avg_position"],
+      "impressions": ["Impressions", "Impr.", "impressions"],
+      "clicks": ["Clicks", "clicks"],
+      "ctr": ["CTR", "Click Through Rate", "ctr"],
+      "url": ["URL", "Page", "Landing Page", "url", "page"]
+    },
+    "date_formats": [
+      "YYYY-MM-DD",
+      "MM/DD/YYYY",
+      "DD/MM/YYYY",
+      "YYYY/MM/DD"
+    ]
+  }
+}

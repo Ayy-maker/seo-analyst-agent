@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            background: #f7fafc;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #edf2f7;
+        }
+        
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 20px;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .upload-subtext {
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin: 30px 0;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 12px;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        
+        .flash {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .flash-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #9ae6b4;
+        }
+        
+        .flash-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            padding: 10px 20px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .file-list {
+            margin: 20px 0;
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .file-size {
+            color: #718096;
+            font-size: 12px;
+        }
+        
+        .remove-file {
+            color: #ef4444;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .batch-info {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #3730a3;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SEO Intelligence Platform</h1>
+            <p>Upload any file. Get premium insights instantly.</p>
+            
+            <div class="nav-links">
+                <a href="/dashboard">📊 Dashboard</a>
+                <a href="/competitor-analysis">🎯 Competitors</a>
+            </div>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('single')">
+                    📄 Single Upload
+                </div>
+                <div class="tab" onclick="switchTab('batch')">
+                    📁 Batch Upload (Multiple Brands)
+                </div>
+            </div>
+            
+            <!-- Single Upload Tab -->
+            <div id="single-tab" class="tab-content active">
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="batch-info">
+                        💡 Upload multiple files for ONE brand. All data will be consolidated into ONE report!
+                    </div>
+                    
+                    <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Drop multiple files here or click to browse</div>
+                        <div class="upload-subtext">Supports CSV, XLSX, DOCX, PDF, Images (JPG, PNG)</div>
+                        <input type="file" name="files" id="file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="showSingleFiles(this)">
+                    </div>
+                    
+                    <div id="single-file-list" class="file-list" style="display: none;">
+                        <h4 style="margin-bottom: 10px; color: #2d3748;">Selected Files:</h4>
+                        <div id="single-file-items"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company_name">Company Name</label>
+                        <input type="text" name="company_name" id="company_name" placeholder="Enter company name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="report_period">Report Period</label>
+                        <input type="text" name="report_period" id="report_period" placeholder="e.g., November 2024">
+                    </div>
+                    
+                    <button type="submit" class="btn" id="single-submit">Generate Premium Report</button>
+                </form>
+            </div>
+            
+            <!-- Batch Upload Tab -->
+            <div id="batch-tab" class="tab-content">
+                <form method="POST" action="/upload-batch" enctype="multipart/form-data" id="batch-form">
+                    <div class="batch-info">
+                        💡 Upload multiple files for DIFFERENT brands. Files will be auto-sorted by brand name and separate reports generated!
+                    </div>
+                    
+                    <div class="upload-area" onclick="document.getElementById('batch-file-input').click()">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Drop multiple files here or click to browse</div>
+                        <div class="upload-subtext">Select 2-20 files (CSV, XLSX, DOCX, PDF, Images)</div>
+                        <input type="file" name="files" id="batch-file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="showBatchFiles(this)">
+                    </div>
+                    
+                    <div id="file-list" class="file-list" style="display: none;">
+                        <h4 style="margin-bottom: 10px; color: #2d3748;">Selected Files:</h4>
+                        <div id="file-items"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="batch_report_period">Report Period (for all brands)</label>
+                        <input type="text" name="report_period" id="batch_report_period" placeholder="e.g., November 2024">
+                    </div>
+                    
+                    <button type="submit" class="btn" id="batch-submit" disabled>Generate Reports for All Brands</button>
+                </form>
+            </div>
+            
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">Instant Analysis</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">Beautiful Reports</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-text">Actionable Insights</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔮</div>
+                    <div class="feature-text">90-Day Forecast</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedFiles = [];
+        
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+        
+        function showSingleFiles(input) {
+            const fileList = document.getElementById('single-file-list');
+            const fileItems = document.getElementById('single-file-items');
+            const uploadText = document.querySelector('#single-tab .upload-text');
+            
+            if (input.files && input.files.length > 0) {
+                uploadText.textContent = `${input.files.length} file(s) selected for ONE brand`;
+                fileList.style.display = 'block';
+                fileItems.innerHTML = '';
+                
+                Array.from(input.files).forEach((file, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'file-item';
+                    item.innerHTML = `
+                        <span class="file-icon">📄</span>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${(file.size / 1024).toFixed(1)} KB</div>
+                        </div>
+                    `;
+                    fileItems.appendChild(item);
+                });
+            }
+        }
+        
+        function showBatchFiles(input) {
+            selectedFiles = Array.from(input.files);
+            const fileList = document.getElementById('file-list');
+            const fileItems = document.getElementById('file-items');
+            const submitBtn = document.getElementById('batch-submit');
+            
+            if (selectedFiles.length > 0) {
+                fileList.style.display = 'block';
+                submitBtn.disabled = false;
+                
+                fileItems.innerHTML = selectedFiles.map((file, index) => {
+                    const brandName = extractBrandName(file.name);
+                    const fileSize = formatFileSize(file.size);
+                    
+                    return `
+                        <div class="file-item" data-index="${index}">
+                            <div>
+                                <div class="file-name">📄 ${file.name}</div>
+                                <div class="file-size">Brand: <strong>${brandName}</strong> • ${fileSize}</div>
+                            </div>
+                            <span class="remove-file" onclick="removeFile(${index})">✕</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                const uploadText = document.querySelector('#batch-tab .upload-text');
+                uploadText.textContent = `${selectedFiles.length} files selected - Ready to process!`;
+            }
+        }
+        
+        function extractBrandName(filename) {
+            // Remove extension
+            let name = filename.replace(/\.(csv|xlsx?|docx?|pdf)$/i, '');
+            
+            // Extract brand name patterns
+            // Example: "Monthly reports of example company c" -> "Example Company C"
+            // Example: "example company b_17th October" -> "Example Company B"
+            
+            // Try to find "of [brand]" pattern
+            const ofMatch = name.match(/of\s+(.+?)[\s_-]*(?:\d|$)/i);
+            if (ofMatch) {
+                name = ofMatch[1];
+            }
+            
+            // Clean up
+            name = name
+                .replace(/[\s_-]+/g, ' ')  // Replace separators with space
+                .replace(/\d{1,2}(?:st|nd|rd|th)?\s+\w+,?\s+\d{4}/gi, '')  // Remove dates
+                .replace(/monthly\s+reports?/gi, '')  // Remove "monthly reports"
+                .replace(/reports?\s+snapshot/gi, '')  // Remove "reports snapshot"
+                .replace(/performance\s+on/gi, '')  // Remove "performance on"
+                .trim();
+            
+            // Capitalize words
+            name = name.split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+            
+            return name || 'Unknown Brand';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        function removeFile(index) {
+            const input = document.getElementById('batch-file-input');
+            const dt = new DataTransfer();
+            
+            selectedFiles = selectedFiles.filter((_, i) => i !== index);
+            selectedFiles.forEach(file => dt.items.add(file));
+            
+            input.files = dt.files;
+            showBatchFiles(input);
+            
+            if (selectedFiles.length === 0) {
+                document.getElementById('file-list').style.display = 'none';
+                document.getElementById('batch-submit').disabled = true;
+                const uploadText = document.querySelector('#batch-tab .upload-text');
+                uploadText.textContent = 'Drop multiple files here or click to browse';
+            }
+        }
+        
+        // Drag and drop for single upload
+        const uploadAreas = document.querySelectorAll('.upload-area');
+        
+        uploadAreas.forEach(uploadArea => {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.style.borderColor = '#667eea';
+                    uploadArea.style.background = '#edf2f7';
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.style.borderColor = '#cbd5e0';
+                    uploadArea.style.background = '#f7fafc';
+                });
+            });
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        // Single file drop
+        document.querySelector('#single-tab .upload-area').addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            document.getElementById('file-input').files = files;
+            if (files.length > 0) {
+                showFileName({files: files});
+            }
+        });
+        
+        // Batch file drop
+        document.querySelector('#batch-tab .upload-area').addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            document.getElementById('batch-file-input').files = files;
+            showBatchFiles(document.getElementById('batch-file-input'));
+        });
+    </script>
+</body>
+</html>

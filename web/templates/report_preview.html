@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Preview - {{ client.name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 40px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header-info h1 {
+            font-size: 32px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .header-info p {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .preview-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            min-height: 600px;
+        }
+        
+        .preview-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: #f7fafc;
+            color: #667eea;
+        }
+        
+        .preview-frame {
+            width: 100%;
+            height: 800px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #2d3748;
+        }
+        
+        .back-link {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateX(-5px);
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-success {
+            background: #48bb7820;
+            color: #48bb78;
+            border-left: 4px solid #48bb78;
+        }
+        
+        .alert-info {
+            background: #667eea20;
+            color: #667eea;
+            border-left: 4px solid #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('index') }}" class="back-link">
+            ← Back to Dashboard
+        </a>
+        
+        <div class="header">
+            <div class="header-content">
+                <div class="header-info">
+                    <h1>📊 {{ client.name }}</h1>
+                    <p>Report Period: {{ report.report_period }} | Generated: {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at else 'Recently' }}</p>
+                </div>
+                <div class="header-actions">
+                    {% if html_path %}
+                    <a href="{{ url_for('preview_file', filepath=html_path) }}" class="btn btn-primary" target="_blank">
+                        👁️ Preview Report
+                    </a>
+                    <a href="{{ url_for('download_file', filepath=html_path) }}" class="btn btn-success">
+                        📥 Download HTML Report
+                    </a>
+                    {% else %}
+                    <button class="btn btn-secondary" disabled>
+                        ⚠️ Report File Not Found
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Insights</div>
+                <div class="stat-value">{{ insights|length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Health Score</div>
+                <div class="stat-value">{{ report.health_score }}/100</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Report ID</div>
+                <div class="stat-value">#{{ report.id }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Client ID</div>
+                <div class="stat-value">#{{ client.id }}</div>
+            </div>
+        </div>
+        
+        {% if html_path %}
+        <div class="alert alert-success">
+            ✅ Report generated successfully! You can preview the HTML report or download it.
+        </div>
+        
+        <div class="alert alert-info">
+            💡 <strong>Tip:</strong> The HTML report includes interactive Chart.js visualizations, smooth animations, and is fully responsive. Perfect for viewing on any device!
+        </div>
+        
+        <div class="preview-container">
+            <div class="preview-tabs">
+                <button class="tab-btn active" onclick="showPreview()">📊 Report Preview</button>
+                <button class="tab-btn" onclick="alert('Insights details coming soon!')">📋 Insights Details</button>
+            </div>
+            
+            <iframe id="preview-frame" class="preview-frame" src="{{ url_for('preview_file', filepath=html_path) }}"></iframe>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            ⚠️ <strong>Report file not found.</strong> The HTML report file may have been deleted or moved. Please generate a new report.
+        </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        function showPreview() {
+            document.getElementById('preview-frame').src = "{{ url_for('preview_file', filepath=html_path) }}";
+            
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
