@@ -55,7 +55,7 @@ def index():
     return render_template('index.html', clients=clients)
 
 
-@app.route('/upload-batch', methods=['POST'])
+@app.route('/upload-batch', methods=['GET', 'POST'])
 def upload_batch():
     """Handle multiple file uploads, auto-sort by brand, generate separate reports"""
     
