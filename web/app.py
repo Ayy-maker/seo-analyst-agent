@@ -188,13 +188,7 @@ def upload_batch():
                 'message': str(e)
             })
     
-    # Show results
-    success_count = len([r for r in results if r['status'] == 'success'])
-    error_count = len([r for r in results if r['status'] == 'error'])
-    
-    flash(f'Batch complete! {success_count} reports generated, {error_count} errors', 
-          'success' if success_count > 0 else 'error')
-    
+    # Return beautiful results page (no flash message needed - results page shows everything)
     return render_template('batch_results.html', results=results)
 
 
