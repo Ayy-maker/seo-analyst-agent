@@ -439,8 +439,9 @@ def view_report(report_id):
         
         # Get HTML path from report database record
         html_path = report.get('file_path', '')
+        file_exists = False
         
-        # Resolve path properly
+        # Check if file exists
         if html_path:
             file_path = Path(html_path)
             
@@ -449,19 +450,16 @@ def view_report(report_id):
                 project_root = Path(__file__).parent.parent
                 file_path = project_root / html_path
             
-            # Check if file exists
-            if not file_path.exists():
+            file_exists = file_path.exists()
+            
+            if not file_exists:
                 flash('Report file not found. Please regenerate the report.', 'warning')
-                html_path = ''
-            else:
-                # Always pass the absolute path to template
-                html_path = str(file_path.resolve())
         
         return render_template('report_preview.html', 
                              report=report,
                              client=client,
                              insights=insights,
-                             html_path=html_path)
+                             file_exists=file_exists)
     except Exception as e:
         flash(f'Error loading report: {str(e)}', 'error')
         return redirect(url_for('index'))
@@ -534,14 +532,46 @@ def download_file(filepath):
         return redirect(url_for('index'))
 
 
+@app.route('/report/<int:report_id>/preview')
+def preview_report(report_id):
+    """Preview HTML report by report ID"""
+    try:
+        # Get report from database
+        reports = db.get_reports(client_id=None, limit=100)
+        report = next((r for r in reports if r['id'] == report_id), None)
+        
+        if not report:
+            flash('Report not found', 'error')
+            return redirect(url_for('index'))
+        
+        # Get HTML file path
+        html_path = report.get('file_path', '')
+        if not html_path:
+            flash('Report file path not found', 'error')
+            return redirect(url_for('index'))
+        
+        # Convert to absolute path if needed
+        file_path = Path(html_path)
+        if not file_path.is_absolute():
+            project_root = Path(__file__).parent.parent
+            file_path = project_root / html_path
+        
+        if file_path.exists() and file_path.suffix == '.html':
+            return send_file(str(file_path), mimetype='text/html')
+        else:
+            flash(f'Report file not found', 'error')
+            return redirect(url_for('index'))
+    except Exception as e:
+        flash(f'Error previewing report: {str(e)}', 'error')
+        return redirect(url_for('index'))
+
 @app.route('/preview/<path:filepath>')
 def preview_file(filepath):
-    """Preview HTML report in browser"""
+    """Preview HTML report in browser (legacy route)"""
     try:
-        # filepath is already an absolute path from the template
+        # This route is for backward compatibility
+        # Try to find the report by file path
         file_path = Path(filepath)
-        
-        # Only convert if it's actually relative
         if not file_path.is_absolute():
             project_root = Path(__file__).parent.parent
             file_path = project_root / filepath
@@ -549,7 +579,7 @@ def preview_file(filepath):
         if file_path.exists() and file_path.suffix == '.html':
             return send_file(str(file_path), mimetype='text/html')
         else:
-            flash(f'File not found at: {file_path}', 'error')
+            flash(f'File not found', 'error')
             return redirect(url_for('index'))
     except Exception as e:
         flash(f'Error previewing file: {str(e)}', 'error')

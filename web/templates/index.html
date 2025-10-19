@@ -315,12 +315,13 @@
                         <div class="upload-icon">📁</div>
                         <div class="upload-text">Drop multiple files here or click to browse</div>
                         <div class="upload-subtext">Supports CSV, XLSX, DOCX, PDF, Images (JPG, PNG)</div>
-                        <input type="file" name="files" id="file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="showSingleFiles(this)">
+                        <input type="file" id="file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="addSingleFiles(this)">
                     </div>
                     
                     <div id="single-file-list" class="file-list" style="display: none;">
                         <h4 style="margin-bottom: 10px; color: #2d3748;">Selected Files:</h4>
                         <div id="single-file-items"></div>
+                        <button type="button" onclick="document.getElementById('file-input').click()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">+ Add More Files</button>
                     </div>
                     
                     <div class="form-group">
@@ -348,12 +349,13 @@
                         <div class="upload-icon">📁</div>
                         <div class="upload-text">Drop multiple files here or click to browse</div>
                         <div class="upload-subtext">Select 2-20 files (CSV, XLSX, DOCX, PDF, Images)</div>
-                        <input type="file" name="files" id="batch-file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="showBatchFiles(this)">
+                        <input type="file" id="batch-file-input" style="display: none;" accept=".csv,.xlsx,.xls,.docx,.doc,.pdf,.jpg,.jpeg,.png,.gif" multiple onchange="addBatchFiles(this)">
                     </div>
                     
                     <div id="file-list" class="file-list" style="display: none;">
                         <h4 style="margin-bottom: 10px; color: #2d3748;">Selected Files:</h4>
                         <div id="file-items"></div>
+                        <button type="button" onclick="document.getElementById('batch-file-input').click()" style="margin-top: 10px; padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">+ Add More Files</button>
                     </div>
                     
                     <div class="form-group">
@@ -388,6 +390,7 @@
     
     <script>
         let selectedFiles = [];
+        let singleSelectedFiles = [];
         
         function switchTab(tab) {
             // Update tab buttons
@@ -399,36 +402,82 @@
             document.getElementById(tab + '-tab').classList.add('active');
         }
         
-        function showSingleFiles(input) {
+        function addSingleFiles(input) {
+            if (input.files && input.files.length > 0) {
+                // Add new files to existing array
+                Array.from(input.files).forEach(file => {
+                    // Check if file already exists
+                    const exists = singleSelectedFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (!exists) {
+                        singleSelectedFiles.push(file);
+                    }
+                });
+                
+                // Reset the input
+                input.value = '';
+                
+                // Update display
+                updateSingleFileDisplay();
+            }
+        }
+        
+        function updateSingleFileDisplay() {
             const fileList = document.getElementById('single-file-list');
             const fileItems = document.getElementById('single-file-items');
             const uploadText = document.querySelector('#single-tab .upload-text');
             
-            if (input.files && input.files.length > 0) {
-                uploadText.textContent = `${input.files.length} file(s) selected for ONE brand`;
+            if (singleSelectedFiles.length > 0) {
+                uploadText.textContent = `${singleSelectedFiles.length} file(s) selected for ONE brand`;
                 fileList.style.display = 'block';
                 fileItems.innerHTML = '';
                 
-                Array.from(input.files).forEach((file, index) => {
+                singleSelectedFiles.forEach((file, index) => {
                     const item = document.createElement('div');
                     item.className = 'file-item';
                     item.innerHTML = `
-                        <span class="file-icon">📄</span>
-                        <div class="file-info">
-                            <div class="file-name">${file.name}</div>
+                        <div>
+                            <div class="file-name">📄 ${file.name}</div>
                             <div class="file-size">${(file.size / 1024).toFixed(1)} KB</div>
                         </div>
+                        <span class="remove-file" onclick="removeSingleFile(${index})">✕</span>
                     `;
                     fileItems.appendChild(item);
                 });
+            } else {
+                fileList.style.display = 'none';
+                uploadText.textContent = 'Drop multiple files here or click to browse';
             }
         }
         
-        function showBatchFiles(input) {
-            selectedFiles = Array.from(input.files);
+        function removeSingleFile(index) {
+            singleSelectedFiles.splice(index, 1);
+            updateSingleFileDisplay();
+        }
+        
+        function addBatchFiles(input) {
+            if (input.files && input.files.length > 0) {
+                // Add new files to existing array
+                Array.from(input.files).forEach(file => {
+                    // Check if file already exists
+                    const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (!exists) {
+                        selectedFiles.push(file);
+                    }
+                });
+                
+                // Reset the input
+                input.value = '';
+                
+                // Update display
+                updateBatchFileDisplay();
+            }
+        }
+        
+        function updateBatchFileDisplay() {
             const fileList = document.getElementById('file-list');
             const fileItems = document.getElementById('file-items');
             const submitBtn = document.getElementById('batch-submit');
+            const uploadText = document.querySelector('#batch-tab .upload-text');
             
             if (selectedFiles.length > 0) {
                 fileList.style.display = 'block';
@@ -449,8 +498,11 @@
                     `;
                 }).join('');
                 
-                const uploadText = document.querySelector('#batch-tab .upload-text');
                 uploadText.textContent = `${selectedFiles.length} files selected - Ready to process!`;
+            } else {
+                fileList.style.display = 'none';
+                submitBtn.disabled = true;
+                uploadText.textContent = 'Drop multiple files here or click to browse';
             }
         }
         
@@ -492,22 +544,59 @@
         }
         
         function removeFile(index) {
-            const input = document.getElementById('batch-file-input');
-            const dt = new DataTransfer();
+            selectedFiles.splice(index, 1);
+            updateBatchFileDisplay();
+        }
+        
+        // Handle form submission for single upload
+        document.querySelector('#single-tab form').addEventListener('submit', function(e) {
+            if (singleSelectedFiles.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one file');
+                return;
+            }
             
-            selectedFiles = selectedFiles.filter((_, i) => i !== index);
+            // Create a DataTransfer to hold files
+            const dt = new DataTransfer();
+            singleSelectedFiles.forEach(file => dt.items.add(file));
+            
+            // Create or update the file input
+            let fileInput = this.querySelector('input[name="files"]');
+            if (!fileInput) {
+                fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.name = 'files';
+                fileInput.multiple = true;
+                fileInput.style.display = 'none';
+                this.appendChild(fileInput);
+            }
+            fileInput.files = dt.files;
+        });
+        
+        // Handle form submission for batch upload
+        document.querySelector('#batch-tab form').addEventListener('submit', function(e) {
+            if (selectedFiles.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one file');
+                return;
+            }
+            
+            // Create a DataTransfer to hold files
+            const dt = new DataTransfer();
             selectedFiles.forEach(file => dt.items.add(file));
             
-            input.files = dt.files;
-            showBatchFiles(input);
-            
-            if (selectedFiles.length === 0) {
-                document.getElementById('file-list').style.display = 'none';
-                document.getElementById('batch-submit').disabled = true;
-                const uploadText = document.querySelector('#batch-tab .upload-text');
-                uploadText.textContent = 'Drop multiple files here or click to browse';
+            // Create or update the file input
+            let fileInput = this.querySelector('input[name="files"]');
+            if (!fileInput) {
+                fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.name = 'files';
+                fileInput.multiple = true;
+                fileInput.style.display = 'none';
+                this.appendChild(fileInput);
             }
-        }
+            fileInput.files = dt.files;
+        });
         
         // Drag and drop for single upload
         const uploadAreas = document.querySelectorAll('.upload-area');
@@ -540,17 +629,29 @@
         // Single file drop
         document.querySelector('#single-tab .upload-area').addEventListener('drop', (e) => {
             const files = e.dataTransfer.files;
-            document.getElementById('file-input').files = files;
             if (files.length > 0) {
-                showFileName({files: files});
+                Array.from(files).forEach(file => {
+                    const exists = singleSelectedFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (!exists) {
+                        singleSelectedFiles.push(file);
+                    }
+                });
+                updateSingleFileDisplay();
             }
         });
         
         // Batch file drop
         document.querySelector('#batch-tab .upload-area').addEventListener('drop', (e) => {
             const files = e.dataTransfer.files;
-            document.getElementById('batch-file-input').files = files;
-            showBatchFiles(document.getElementById('batch-file-input'));
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (!exists) {
+                        selectedFiles.push(file);
+                    }
+                });
+                updateBatchFileDisplay();
+            }
         });
     </script>
 </body>

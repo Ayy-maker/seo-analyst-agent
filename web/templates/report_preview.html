@@ -243,11 +243,11 @@
                     <p>Report Period: {{ report.report_period }} | Generated: {{ report.created_at_formatted }}</p>
                 </div>
                 <div class="header-actions">
-                    {% if html_path %}
-                    <a href="{{ url_for('preview_file', filepath=html_path) }}" class="btn btn-primary" target="_blank">
+                    {% if file_exists %}
+                    <a href="{{ url_for('preview_report', report_id=report.id) }}" class="btn btn-primary" target="_blank">
                         👁️ Preview Report
                     </a>
-                    <a href="{{ url_for('download_file', filepath=html_path) }}" class="btn btn-success">
+                    <a href="{{ url_for('download_report', report_id=report.id) }}" class="btn btn-success">
                         📥 Download HTML Report
                     </a>
                     {% else %}
@@ -278,7 +278,7 @@
             </div>
         </div>
         
-        {% if html_path %}
+        {% if file_exists %}
         <div class="alert alert-success">
             ✅ Report generated successfully! You can preview the HTML report or download it.
         </div>
@@ -293,7 +293,7 @@
                 <button class="tab-btn" onclick="alert('Insights details coming soon!')">📋 Insights Details</button>
             </div>
             
-            <iframe id="preview-frame" class="preview-frame" src="{{ url_for('preview_file', filepath=html_path) }}"></iframe>
+            <iframe id="preview-frame" class="preview-frame" src="{{ url_for('preview_report', report_id=report.id) }}"></iframe>
         </div>
         {% else %}
         <div class="alert alert-info">
@@ -304,7 +304,9 @@
     
     <script>
         function showPreview() {
-            document.getElementById('preview-frame').src = "{{ url_for('preview_file', filepath=html_path) }}";
+            {% if file_exists %}
+            document.getElementById('preview-frame').src = "{{ url_for('preview_report', report_id=report.id) }}";
+            {% endif %}
             
             // Update active tab
             document.querySelectorAll('.tab-btn').forEach(btn => {
