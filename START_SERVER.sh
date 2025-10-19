@@ -1,44 +1,45 @@
 #!/bin/bash
 
-echo "🚀 Starting SEO Intelligence Platform..."
+# SEO Analyst Agent - Server Startup Script
+# Starts the Flask web server for the SEO Intelligence Platform
+
+echo "========================================"
+echo "🚀 Starting SEO Analyst Agent Server"
+echo "========================================"
 echo ""
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
     echo "❌ Virtual environment not found!"
-    echo "Creating virtual environment..."
-    python3 -m venv venv
-    echo "✅ Virtual environment created"
+    echo ""
+    echo "Please run the installer first:"
+    echo "   bash INSTALL.sh"
+    echo ""
+    exit 1
+fi
+
+# Check if port 5001 is already in use
+if lsof -Pi :5001 -sTCP:LISTEN -t >/dev/null 2>&1 ; then
+    echo "⚠️  Port 5001 is already in use"
+    echo ""
+    echo "Killing existing process..."
+    lsof -ti:5001 | xargs kill -9 2>/dev/null
+    sleep 1
+    echo "✅ Port cleared"
     echo ""
 fi
 
-# Activate virtual environment
-echo "📦 Activating virtual environment..."
-source venv/bin/activate
-
-# Check if dependencies are installed
-echo "🔍 Checking dependencies..."
-if ! python -c "import flask" 2>/dev/null; then
-    echo "📥 Installing dependencies..."
-    pip install -r requirements.txt
-fi
-
-# Kill existing server on port 5000
-echo "🧹 Clearing port 5000..."
-lsof -ti:5000 | xargs kill -9 2>/dev/null
-
+echo "📦 Using virtual environment..."
+echo "🌐 Starting Flask server..."
 echo ""
-echo "════════════════════════════════════════════════════════════"
-echo "✅ SEO INTELLIGENCE PLATFORM STARTING..."
-echo "════════════════════════════════════════════════════════════"
+echo "✅ Server will be available at:"
+echo "   → http://localhost:5001"
+echo "   → http://127.0.0.1:5001"
 echo ""
-echo "📊 Dashboard: http://localhost:5000/dashboard"
-echo "🎯 Competitors: http://localhost:5000/competitor-analysis"
-echo "🏠 Homepage: http://localhost:5000"
+echo "Press Ctrl+C to stop the server"
 echo ""
-echo "Press CTRL+C to stop the server"
-echo "════════════════════════════════════════════════════════════"
+echo "========================================"
 echo ""
 
-# Start server
-python web/app.py
+# Start the server
+venv/bin/python -c "from web.app import app; app.run(host='0.0.0.0', port=5001, debug=False)"

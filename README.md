@@ -123,22 +123,40 @@ http://localhost:5001
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (3 Commands!)
 
-### Installation (2 minutes)
+### Option 1: Automatic Install (Easiest)
+
+```bash
+# Clone and enter directory
+git clone https://github.com/Ayy-maker/seo-analyst-agent.git
+cd seo-analyst-agent
+
+# One-command install (sets up everything!)
+bash INSTALL.sh
+
+# Start server
+bash START_SERVER.sh
+```
+
+### Option 2: Manual Install
 
 ```bash
 # Clone repository
 git clone https://github.com/Ayy-maker/seo-analyst-agent.git
 cd seo-analyst-agent
 
-# Setup environment (if not already done)
+# Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
-pip install -r requirements.txt
+venv/bin/pip install -r requirements.txt
+
+# Start server
+venv/bin/python -c "from web.app import app; app.run(port=5001)"
 ```
+
+**Then open:** http://localhost:5001
 
 ## 🎯 How to Run
 
