@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Reports - SEO Analyst Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+        
+        .stat-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #718096;
+            font-weight: 600;
+        }
+        
+        .filters {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .filter-group select, .filter-group input {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .filter-group select:focus, .filter-group input:focus {
+            border-color: #667eea;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            color: #2d3748;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 20px 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #4a5568;
+        }
+        
+        tbody tr {
+            transition: all 0.3s;
+        }
+        
+        tbody tr:hover {
+            background: #f7fafc;
+        }
+        
+        .company-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .company-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .company-info {
+            flex: 1;
+        }
+        
+        .company-name {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 3px;
+        }
+        
+        .company-id {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .badge-warning {
+            background: #fef3c7;
+            color: #78350f;
+        }
+        
+        .badge-danger {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .score {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+        
+        .score.high {
+            color: #38a169;
+        }
+        
+        .score.medium {
+            color: #d69e2e;
+        }
+        
+        .score.low {
+            color: #e53e3e;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: #718096;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+            
+            .filter-group select, .filter-group input {
+                width: 100%;
+            }
+            
+            .table-container {
+                overflow-x: scroll;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav">
+            <a href="{{ url_for('index') }}" class="nav-link">
+                🏠 Home
+            </a>
+            <a href="{{ url_for('view_reports') }}" class="nav-link active">
+                📊 All Reports
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                📈 Analytics Dashboard
+            </a>
+        </div>
+        
+        <div class="header">
+            <div class="header-content">
+                <div>
+                    <h1>📊 All Reports</h1>
+                    <p>Manage and view all your SEO reports</p>
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary" style="padding: 12px 24px; font-size: 16px;">
+                    ➕ Generate New Report
+                </a>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value">{{ total_reports }}</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-value">{{ total_clients }}</div>
+                <div class="stat-label">Total Clients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💡</div>
+                <div class="stat-value">{{ total_insights }}</div>
+                <div class="stat-label">Total Insights</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value">{{ avg_health_score|round|int }}</div>
+                <div class="stat-label">Avg Health Score</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label>🔍 Search:</label>
+                <input type="text" id="searchInput" placeholder="Search by company name..." style="flex: 1; min-width: 250px;">
+                
+                <label>📅 Filter by Date:</label>
+                <select id="dateFilter" style="min-width: 150px;">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+                
+                <label>🎯 Score:</label>
+                <select id="scoreFilter" style="min-width: 150px;">
+                    <option value="all">All Scores</option>
+                    <option value="high">High (80+)</option>
+                    <option value="medium">Medium (50-79)</option>
+                    <option value="low">Low (&lt;50)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            {% if reports|length > 0 %}
+            <table id="reportsTable">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Report Period</th>
+                        <th>Health Score</th>
+                        <th>Insights</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr data-company="{{ report.client_name|lower }}" data-score="{{ report.health_score }}" data-date="{{ report.created_at }}">
+                        <td>
+                            <div class="company-cell">
+                                <div class="company-avatar">
+                                    {{ report.client_name[0]|upper }}
+                                </div>
+                                <div class="company-info">
+                                    <div class="company-name">{{ report.client_name }}</div>
+                                    <div class="company-id">Client #{{ report.client_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <strong>{{ report.report_period }}</strong>
+                        </td>
+                        <td>
+                            <span class="score {% if report.health_score >= 80 %}high{% elif report.health_score >= 50 %}medium{% else %}low{% endif %}">
+                                {% if report.health_score >= 80 %}🟢{% elif report.health_score >= 50 %}🟡{% else %}🔴{% endif %}
+                                {{ report.health_score }}/100
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-success">{{ report.insight_count }} insights</span>
+                        </td>
+                        <td>
+                            {{ report.created_at_formatted }}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('preview_report', report_id=report.id) }}" class="btn btn-primary" target="_blank">
+                                    👁️ Preview
+                                </a>
+                                <a href="{{ url_for('download_report', report_id=report.id) }}" class="btn btn-success">
+                                    📥 Download
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <h3>No Reports Yet</h3>
+                <p>Start by generating your first SEO report</p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary" style="padding: 12px 24px; font-size: 16px;">
+                    ➕ Generate First Report
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const dateFilter = document.getElementById('dateFilter');
+        const scoreFilter = document.getElementById('scoreFilter');
+        const tableRows = document.querySelectorAll('#reportsTable tbody tr');
+        
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const dateValue = dateFilter.value;
+            const scoreValue = scoreFilter.value;
+            
+            tableRows.forEach(row => {
+                const company = row.dataset.company;
+                const score = parseInt(row.dataset.score);
+                const date = new Date(row.dataset.date);
+                const now = new Date();
+                
+                // Search filter
+                const matchesSearch = company.includes(searchTerm);
+                
+                // Date filter
+                let matchesDate = true;
+                if (dateValue === 'today') {
+                    matchesDate = date.toDateString() === now.toDateString();
+                } else if (dateValue === 'week') {
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    matchesDate = date >= weekAgo;
+                } else if (dateValue === 'month') {
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    matchesDate = date >= monthAgo;
+                }
+                
+                // Score filter
+                let matchesScore = true;
+                if (scoreValue === 'high') {
+                    matchesScore = score >= 80;
+                } else if (scoreValue === 'medium') {
+                    matchesScore = score >= 50 && score < 80;
+                } else if (scoreValue === 'low') {
+                    matchesScore = score < 50;
+                }
+                
+                // Show/hide row
+                if (matchesSearch && matchesDate && matchesScore) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        searchInput.addEventListener('input', filterTable);
+        dateFilter.addEventListener('change', filterTable);
+        scoreFilter.addEventListener('change', filterTable);
+    </script>
+</body>
+</html>

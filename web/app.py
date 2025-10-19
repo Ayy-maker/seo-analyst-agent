@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 from pathlib import Path
 import os
 import sys
+import sqlite3
 
 # Add project to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -404,6 +405,74 @@ def client_detail(client_id):
     
     return render_template('client.html', client=client, reports=reports, stats=stats)
 
+
+@app.route('/reports')
+def view_reports():
+    """View all reports dashboard"""
+    db_path = Path(__file__).parent.parent / 'database' / 'seo_data.db'
+    
+    # Get all reports with client info
+    query = """
+        SELECT 
+            r.id,
+            r.client_id,
+            r.report_period,
+            r.health_score,
+            r.created_at,
+            c.name as client_name,
+            (SELECT COUNT(*) FROM insights WHERE report_id = r.id) as insight_count
+        FROM reports r
+        JOIN clients c ON r.client_id = c.id
+        ORDER BY r.created_at DESC
+    """
+    
+    conn = sqlite3.connect(str(db_path))
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(query)
+    reports_data = cursor.fetchall()
+    
+    # Get statistics
+    cursor.execute("SELECT COUNT(*) FROM reports")
+    total_reports = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM clients")
+    total_clients = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM insights")
+    total_insights = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT AVG(health_score) FROM reports")
+    avg_health_score = cursor.fetchone()[0] or 0
+    
+    conn.close()
+    
+    # Format reports
+    reports = []
+    for row in reports_data:
+        try:
+            created_dt = datetime.strptime(row['created_at'], '%Y-%m-%d %H:%M:%S')
+            created_formatted = created_dt.strftime('%b %d, %Y at %I:%M %p')
+        except:
+            created_formatted = row['created_at']
+        
+        reports.append({
+            'id': row['id'],
+            'client_id': row['client_id'],
+            'client_name': row['client_name'],
+            'report_period': row['report_period'],
+            'health_score': row['health_score'],
+            'insight_count': row['insight_count'],
+            'created_at': row['created_at'],
+            'created_at_formatted': created_formatted
+        })
+    
+    return render_template('all_reports.html',
+                         reports=reports,
+                         total_reports=total_reports,
+                         total_clients=total_clients,
+                         total_insights=total_insights,
+                         avg_health_score=avg_health_score)
 
 @app.route('/report/<int:report_id>')
 def view_report(report_id):

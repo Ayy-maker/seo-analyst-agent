@@ -23,6 +23,38 @@
             margin: 0 auto;
         }
         
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            background: white;
+            color: #667eea;
+        }
+        
         .header {
             text-align: center;
             color: white;
@@ -273,6 +305,18 @@
 </head>
 <body>
     <div class="container">
+        <div class="nav">
+            <a href="/" class="nav-link active">
+                🏠 Home
+            </a>
+            <a href="/reports" class="nav-link">
+                📊 View All Reports
+            </a>
+            <a href="/dashboard" class="nav-link">
+                📈 Analytics Dashboard
+            </a>
+        </div>
+        
         <div class="header">
             <h1>🚀 SEO Intelligence Platform</h1>
             <p>Upload any file. Get premium insights instantly.</p>
