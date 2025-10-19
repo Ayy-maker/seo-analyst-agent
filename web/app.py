@@ -414,6 +414,23 @@ def view_report(report_id):
             flash('Report not found', 'error')
             return redirect(url_for('index'))
         
+        # Convert report dict to mutable dict and handle date formatting
+        report = dict(report)
+        if report.get('created_at'):
+            # If it's a string, convert to datetime
+            if isinstance(report['created_at'], str):
+                try:
+                    from dateutil import parser
+                    report['created_at'] = parser.parse(report['created_at'])
+                except:
+                    # If parsing fails, format the string directly
+                    report['created_at_formatted'] = report['created_at']
+            # Format datetime object
+            if hasattr(report.get('created_at'), 'strftime'):
+                report['created_at_formatted'] = report['created_at'].strftime('%B %d, %Y at %I:%M %p')
+        else:
+            report['created_at_formatted'] = 'Recently'
+        
         # Get client info
         client = db.get_client(client_id=report['client_id'])
         
@@ -423,9 +440,16 @@ def view_report(report_id):
         # Get HTML path from report database record
         html_path = report.get('file_path', '')
         
-        if not html_path or not Path(html_path).exists():
-            flash('Report file not found. Please regenerate the report.', 'warning')
-            html_path = ''  # Will show error in template
+        # Convert to absolute path if needed
+        if html_path:
+            file_path = Path(html_path)
+            if not file_path.is_absolute():
+                project_root = Path(__file__).parent.parent
+                file_path = project_root / html_path
+            
+            if not file_path.exists():
+                flash('Report file not found. Please regenerate the report.', 'warning')
+                html_path = ''
         
         return render_template('report_preview.html', 
                              report=report,

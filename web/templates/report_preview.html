@@ -240,7 +240,7 @@
             <div class="header-content">
                 <div class="header-info">
                     <h1>📊 {{ client.name }}</h1>
-                    <p>Report Period: {{ report.report_period }} | Generated: {{ report.created_at.strftime('%B %d, %Y at %I:%M %p') if report.created_at else 'Recently' }}</p>
+                    <p>Report Period: {{ report.report_period }} | Generated: {{ report.created_at_formatted }}</p>
                 </div>
                 <div class="header-actions">
                     {% if html_path %}
