@@ -446,10 +446,15 @@ def view_report(report_id):
             if not file_path.is_absolute():
                 project_root = Path(__file__).parent.parent
                 file_path = project_root / html_path
+            else:
+                file_path = Path(html_path)
             
             if not file_path.exists():
                 flash('Report file not found. Please regenerate the report.', 'warning')
                 html_path = ''
+            else:
+                # Use the resolved absolute path
+                html_path = str(file_path)
         
         return render_template('report_preview.html', 
                              report=report,
@@ -508,9 +513,18 @@ def download_report(report_id):
 def download_file(filepath):
     """Download generated report files by path"""
     try:
+        # filepath is already an absolute path from the template
         file_path = Path(filepath)
+        
+        # Only convert if it's actually relative
+        if not file_path.is_absolute():
+            project_root = Path(__file__).parent.parent
+            file_path = project_root / filepath
+        
         if file_path.exists():
-            return send_file(str(file_path), as_attachment=True)
+            # Get filename for download
+            filename = file_path.name
+            return send_file(str(file_path), as_attachment=True, download_name=filename, mimetype='text/html')
         else:
             flash('File not found', 'error')
             return redirect(url_for('index'))
@@ -523,9 +537,10 @@ def download_file(filepath):
 def preview_file(filepath):
     """Preview HTML report in browser"""
     try:
+        # filepath is already an absolute path from the template
         file_path = Path(filepath)
         
-        # Convert to absolute path if needed
+        # Only convert if it's actually relative
         if not file_path.is_absolute():
             project_root = Path(__file__).parent.parent
             file_path = project_root / filepath
