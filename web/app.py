@@ -440,21 +440,22 @@ def view_report(report_id):
         # Get HTML path from report database record
         html_path = report.get('file_path', '')
         
-        # Convert to absolute path if needed
+        # Resolve path properly
         if html_path:
             file_path = Path(html_path)
+            
+            # If path is relative, make it absolute
             if not file_path.is_absolute():
                 project_root = Path(__file__).parent.parent
                 file_path = project_root / html_path
-            else:
-                file_path = Path(html_path)
             
+            # Check if file exists
             if not file_path.exists():
                 flash('Report file not found. Please regenerate the report.', 'warning')
                 html_path = ''
             else:
-                # Use the resolved absolute path
-                html_path = str(file_path)
+                # Always pass the absolute path to template
+                html_path = str(file_path.resolve())
         
         return render_template('report_preview.html', 
                              report=report,
