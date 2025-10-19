@@ -59,6 +59,9 @@ def index():
 def upload_batch():
     """Handle multiple file uploads, auto-sort by brand, generate separate reports"""
     
+    if request.method == 'GET':
+        return redirect(url_for('index'))
+    
     if 'files' not in request.files:
         flash('No files uploaded', 'error')
         return redirect(url_for('index'))
