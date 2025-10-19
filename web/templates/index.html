@@ -635,27 +635,38 @@
                 return;
             }
             
-            // Create FormData with all form fields and files
-            const formData = new FormData(this);
+            console.log('Batch upload: submitting', selectedFiles.length, 'files');
             
-            // Remove temp file input data
-            formData.delete('files-temp');
+            // Create FormData with all form fields and files
+            const formData = new FormData();
+            
+            // Add report period
+            const reportPeriod = this.querySelector('[name="report_period"]').value;
+            formData.append('report_period', reportPeriod);
             
             // Add all selected files
             selectedFiles.forEach(file => {
                 formData.append('files', file);
+                console.log('Adding file:', file.name);
             });
             
-            // Submit via fetch
-            fetch(this.action, {
+            // Submit via fetch to batch upload route
+            fetch('/upload-batch', {
                 method: 'POST',
                 body: formData
             }).then(response => {
+                console.log('Response status:', response.status);
                 if (response.ok) {
-                    window.location.href = response.url;
+                    // Response is HTML, navigate to it
+                    return response.text();
                 } else {
-                    alert('Upload failed. Please try again.');
+                    throw new Error('Upload failed');
                 }
+            }).then(html => {
+                // Replace current page with response
+                document.open();
+                document.write(html);
+                document.close();
             }).catch(error => {
                 console.error('Upload error:', error);
                 alert('Upload failed. Please try again.');
