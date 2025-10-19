@@ -451,11 +451,31 @@ def download_report(report_id):
         
         # Get HTML file path
         html_path = report.get('file_path', '')
-        if not html_path or not Path(html_path).exists():
-            flash('Report file not found. Please regenerate the report.', 'error')
+        if not html_path:
+            flash('Report file path not found. Please regenerate the report.', 'error')
             return redirect(url_for('index'))
         
-        return send_file(str(html_path), as_attachment=True, download_name=f"seo-report-{report_id}.html")
+        # Convert to absolute path if needed
+        file_path = Path(html_path)
+        if not file_path.is_absolute():
+            project_root = Path(__file__).parent.parent
+            file_path = project_root / html_path
+        
+        if not file_path.exists():
+            flash(f'Report file not found at: {file_path}. Please regenerate the report.', 'error')
+            return redirect(url_for('index'))
+        
+        # Get the client name for a better filename
+        client = db.get_client(client_id=report['client_id'])
+        client_name = client['name'].replace(' ', '-').lower() if client else 'client'
+        download_filename = f"seo-report-{client_name}-{report_id}.html"
+        
+        return send_file(
+            str(file_path), 
+            as_attachment=True, 
+            download_name=download_filename,
+            mimetype='text/html'
+        )
     except Exception as e:
         flash(f'Error downloading file: {str(e)}', 'error')
         return redirect(url_for('index'))
@@ -480,10 +500,16 @@ def preview_file(filepath):
     """Preview HTML report in browser"""
     try:
         file_path = Path(filepath)
+        
+        # Convert to absolute path if needed
+        if not file_path.is_absolute():
+            project_root = Path(__file__).parent.parent
+            file_path = project_root / filepath
+        
         if file_path.exists() and file_path.suffix == '.html':
-            return send_file(str(file_path))
+            return send_file(str(file_path), mimetype='text/html')
         else:
-            flash('File not found or not previewable', 'error')
+            flash(f'File not found at: {file_path}', 'error')
             return redirect(url_for('index'))
     except Exception as e:
         flash(f'Error previewing file: {str(e)}', 'error')
