@@ -1,0 +1,84 @@
+name: Deploy SEO Analyst Agent
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix={{date 'YYYYMMDD'}}-
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 31.97.222.218
+          username: avi
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /srv/apps/seo-analyst
+
+            # Store previous tag for rollback
+            PREVIOUS_TAG=$(grep "TAG=" .env | cut -d'=' -f2 || echo "latest")
+            echo "$PREVIOUS_TAG" > .previous_tag
+
+            # Update to new tag
+            NEW_TAG="${{ fromJSON(steps.meta.outputs.json).tags[0] }}"
+            sed -i "s/TAG=.*/TAG=${NEW_TAG##*:}/" .env
+
+            # Pull new image
+            docker compose pull
+
+            # Deploy with health check
+            docker compose up -d --force-recreate
+
+            # Wait for health check (60s timeout)
+            for i in {1..12}; do
+              if curl -f http://localhost:5001/ > /dev/null 2>&1; then
+                echo "✅ Deployment successful!"
+                echo "DEPLOYED_AT=$(date -Iseconds)" >> .env
+                exit 0
+              fi
+              sleep 5
+            done
+
+            # Rollback on failure
+            echo "❌ Health check failed. Rolling back..."
+            sed -i "s/TAG=.*/TAG=$PREVIOUS_TAG/" .env
+            docker compose up -d --force-recreate
+            exit 1
