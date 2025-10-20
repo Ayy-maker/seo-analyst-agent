@@ -20,6 +20,7 @@ from agents.analyst import AnalystAgent
 from agents.critic import CriticAgent
 from agents.reporter.enhanced_html_generator import EnhancedHTMLGenerator
 from agents.analyst.competitor_analyzer import CompetitorAnalyzer
+from utils.data_normalizer import data_normalizer
 from datetime import datetime
 
 app = Flask(__name__)
@@ -156,12 +157,17 @@ def upload_batch():
                 health_score=health_score
             )
             db.save_insights(report_id, client_id, approved_insights)
-            
-            # Generate HTML report only
+
+            # Normalize data if it's GSC CSV
+            normalized_data = None
+            if parsed_data.get('source') == 'Google Search Console':
+                normalized_data = data_normalizer.normalize_gsc_data(parsed_data, company_name)
+
+            # Generate HTML report with REAL or DEMO data
             html_file = html_generator.generate_full_report(
                 company_name=company_name,
                 report_period=report_period,
-                seo_data=None  # Will use default sample data
+                seo_data=normalized_data  # Uses real data if GSC, otherwise demo
             )
             
             # Store HTML file path in database
@@ -311,12 +317,20 @@ def upload_file():
             health_score=health_score
         )
         db.save_insights(report_id, client_id, approved_insights)
-        
-        # Generate HTML report only
+
+        # Try to normalize GSC data from consolidated data
+        normalized_data = None
+        # Check if any file was GSC data
+        for parsed in all_parsed_data:
+            if parsed.get('source') == 'Google Search Console':
+                normalized_data = data_normalizer.normalize_gsc_data(parsed, company_name)
+                break  # Use first GSC file found
+
+        # Generate HTML report with REAL or DEMO data
         html_file = html_generator.generate_full_report(
             company_name=company_name,
             report_period=report_period,
-            seo_data=None  # Will use default sample data for now
+            seo_data=normalized_data  # Uses real data if GSC found, otherwise demo
         )
         
         # Store HTML file path in database
