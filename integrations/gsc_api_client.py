@@ -12,6 +12,7 @@ import os
 # Google API imports (installed in requirements.txt)
 try:
     from google.oauth2.credentials import Credentials
+    from google.oauth2 import service_account
     from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
     from googleapiclient.discovery import build
@@ -27,12 +28,13 @@ class GSCAPIClient:
     # OAuth 2.0 scopes required for Search Console API
     SCOPES = ['https://www.googleapis.com/auth/webmasters.readonly']
 
-    def __init__(self, credentials_dir: str = None):
+    def __init__(self, credentials_dir: str = None, service_account_file: str = None):
         """
         Initialize GSC API client
 
         Args:
             credentials_dir: Directory to store OAuth credentials
+            service_account_file: Path to service account JSON key file (optional)
         """
         if not GOOGLE_APIS_AVAILABLE:
             raise ImportError(
@@ -44,8 +46,10 @@ class GSCAPIClient:
         self.credentials_dir.mkdir(parents=True, exist_ok=True)
 
         self.token_path = self.credentials_dir / 'gsc_token.json'
+        self.service_account_path = Path(service_account_file) if service_account_file else (self.credentials_dir / 'service_account.json')
         self.credentials = None
         self.service = None
+        self.auth_method = None  # 'oauth' or 'service_account'
 
     def get_authorization_url(self, client_secrets_file: str) -> str:
         """
@@ -131,14 +135,38 @@ class GSCAPIClient:
         credentials = self._load_credentials()
         return credentials is not None and credentials.valid
 
+    def _load_service_account_credentials(self) -> Optional[Credentials]:
+        """Load service account credentials from file"""
+        if not self.service_account_path.exists():
+            return None
+
+        try:
+            credentials = service_account.Credentials.from_service_account_file(
+                str(self.service_account_path),
+                scopes=self.SCOPES
+            )
+            self.auth_method = 'service_account'
+            return credentials
+        except Exception as e:
+            print(f"Error loading service account credentials: {e}")
+            return None
+
     def connect(self) -> bool:
         """
         Connect to Google Search Console API
+        Tries service account first, then OAuth
 
         Returns:
             True if connected successfully, False otherwise
         """
-        self.credentials = self._load_credentials()
+        # Try service account first
+        self.credentials = self._load_service_account_credentials()
+
+        # Fall back to OAuth if service account not available
+        if not self.credentials:
+            self.credentials = self._load_credentials()
+            if self.credentials:
+                self.auth_method = 'oauth'
 
         if not self.credentials:
             return False
