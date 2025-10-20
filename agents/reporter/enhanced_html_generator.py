@@ -1,6 +1,7 @@
 """
 Enhanced HTML Report Generator - 10x Better!
 Includes interactive charts, animations, and comprehensive month-over-month tracking
+WITH PHASE 3: Business Intelligence (Prioritization + Competitive Benchmarking)
 """
 
 from datetime import datetime, timedelta
@@ -16,6 +17,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'utils'))
 
 from industry_detector import industry_detector
 from demo_data_generator import demo_data_generator
+from prioritization_engine import prioritization_engine
+from competitive_benchmarks import competitive_benchmarks
 
 
 class EnhancedHTMLGenerator:
@@ -87,12 +90,75 @@ class EnhancedHTMLGenerator:
             else:
                 return 'Improving'
 
+        # ============ PHASE 3: GENERATE PRIORITIZED RECOMMENDATIONS ============
+        raw_recommendations = [
+            {
+                'title': 'Mobile Optimization Priority',
+                'description': 'Continue optimizing for mobile devices and implement accelerated mobile pages (AMP) for improved performance.',
+                'expected_impact': f'Increase mobile CTR by +15%, potentially adding {int(totals["clicks"] * 0.15)} monthly clicks',
+                'effort': 'Medium',
+                'timeline': '1 month',
+                'confidence': 'High'
+            },
+            {
+                'title': 'Position Improvement Strategy',
+                'description': 'Focus on queries ranking between positions 15-25 with enhanced content depth and optimization.',
+                'expected_impact': f'Move 5 keywords to page 1, adding ~{int(totals["clicks"] * 0.25)} monthly clicks',
+                'effort': 'Medium',
+                'timeline': '2 weeks',
+                'confidence': 'High'
+            },
+            {
+                'title': 'Content Gap Analysis',
+                'description': 'Create comprehensive guides and comparison content targeting informational queries.',
+                'expected_impact': f'Capture long-tail traffic, +{int(totals["impressions"] * 0.30)} monthly impressions',
+                'effort': 'High',
+                'timeline': '3 months',
+                'confidence': 'Medium'
+            },
+            {
+                'title': 'Technical SEO Enhancements',
+                'description': 'Address identified technical issues and implement structured data markup.',
+                'expected_impact': 'Improve crawlability and rich snippet eligibility',
+                'effort': 'Low',
+                'timeline': '2 weeks',
+                'confidence': 'High'
+            },
+            {
+                'title': 'Local SEO Amplification',
+                'description': 'Increase local business profile activity and acquire location-specific citations.',
+                'expected_impact': f'Boost local visibility by 40%, adding {int(totals["clicks"] * 0.20)} monthly clicks',
+                'effort': 'Low',
+                'timeline': '1 month',
+                'confidence': 'High'
+            }
+        ]
+
+        # Prioritize recommendations using Phase 3 engine
+        prioritized_recs = prioritization_engine.prioritize_recommendations(raw_recommendations)
+
+        # ============ PHASE 3: COMPETITIVE BENCHMARKING ============
+        competitive_data = competitive_benchmarks.compare_performance(
+            data={
+                'avg_position': totals['avg_position'],
+                'ctr': totals['ctr'],
+                'clicks': totals['clicks'],
+                'impressions': totals['impressions']
+            },
+            industry=industry
+        )
+
         return {
             'kpis': {
                 'total_clicks': {'value': totals['clicks'], 'change': 286, 'prev': int(totals['clicks'] * 0.26)},
                 'impressions': {'value': totals['impressions'], 'change': 412, 'prev': int(totals['impressions'] * 0.20)},
                 'ctr': {'value': totals['ctr'], 'change': 25, 'prev': round(totals['ctr'] * 0.8, 2)},
                 'avg_position': {'value': totals['avg_position'], 'change': 40, 'prev': round(totals['avg_position'] * 1.67, 1)}
+            },
+            'phase3': {
+                'prioritized_recommendations': prioritized_recs,
+                'competitive_benchmarks': competitive_data,
+                'priority_summary': prioritization_engine.get_priority_summary(prioritized_recs)
             },
             'top_queries': [
                 {
@@ -122,20 +188,20 @@ class EnhancedHTMLGenerator:
                 {
                     'device': 'Mobile',
                     'icon': '📱',
-                    'clicks': int(totals['clicks'] * (demo_dataset['devices']['mobile'] / 100)),
-                    'percentage': demo_dataset['devices']['mobile']
+                    'clicks': max(0, int(totals['clicks'] * (demo_dataset['devices']['mobile'] / 100))),
+                    'percentage': max(0, demo_dataset['devices']['mobile'])
                 },
                 {
                     'device': 'Desktop',
                     'icon': '💻',
-                    'clicks': int(totals['clicks'] * (demo_dataset['devices']['desktop'] / 100)),
-                    'percentage': demo_dataset['devices']['desktop']
+                    'clicks': max(0, int(totals['clicks'] * (demo_dataset['devices']['desktop'] / 100))),
+                    'percentage': max(0, demo_dataset['devices']['desktop'])
                 },
                 {
                     'device': 'Tablet',
                     'icon': '📟',
-                    'clicks': int(totals['clicks'] * (demo_dataset['devices']['tablet'] / 100)),
-                    'percentage': demo_dataset['devices']['tablet']
+                    'clicks': max(0, int(totals['clicks'] * (demo_dataset['devices']['tablet'] / 100))),
+                    'percentage': max(0, demo_dataset['devices']['tablet'])
                 },
             ],
             'monthly_progress': [
@@ -322,19 +388,19 @@ class EnhancedHTMLGenerator:
                 </tbody>
             </table>
 
+            <!-- PHASE 3: PRIORITIZED RECOMMENDATIONS -->
             <div class="recommendations">
-                <h2>💡 Strategic Recommendations</h2>
-                <ul>
-                    <li><strong>Mobile Optimization Priority:</strong> Continue optimizing for mobile devices and implement accelerated mobile pages (AMP) for improved performance.</li>
-                    <li><strong>Position Improvement Strategy:</strong> Focus on queries ranking between positions 15-25 with enhanced content depth and optimization.</li>
-                    <li><strong>Keyword Expansion Opportunities:</strong> Expand into long-tail keyword variations and location-specific search terms.</li>
-                    <li><strong>Content Gap Analysis:</strong> Create comprehensive guides and comparison content targeting informational queries.</li>
-                    <li><strong>Technical SEO Enhancements:</strong> Address identified technical issues and implement structured data markup.</li>
-                    <li><strong>Local SEO Amplification:</strong> Increase local business profile activity and acquire location-specific citations.</li>
-                    <li><strong>Backlink Acquisition:</strong> Build relationships with industry directories and relevant websites for quality backlinks.</li>
-                    <li><strong>Conversion Rate Optimization:</strong> Implement conversion-focused elements and optimize user journey paths.</li>
-                </ul>
+                <h2>💡 Prioritized Strategic Recommendations</h2>
+                <div class="priority-stats">
+                    <span class="stat-badge quick-win">⚡ {data.get('phase3', {}).get('priority_summary', {}).get('breakdown', {}).get('quick_wins', 0)} Quick Wins</span>
+                    <span class="stat-badge high-impact">🎯 {data.get('phase3', {}).get('priority_summary', {}).get('breakdown', {}).get('high_impact', 0)} High Impact</span>
+                    <span class="stat-badge strategic">📊 {data.get('phase3', {}).get('priority_summary', {}).get('breakdown', {}).get('strategic', 0)} Strategic</span>
+                </div>
+                {self._build_prioritized_recommendations_html(data.get('phase3', {}).get('prioritized_recommendations', []))}
             </div>
+
+            <!-- PHASE 3: COMPETITIVE BENCHMARKING -->
+            {self._build_competitive_benchmarking_html(data.get('phase3', {}).get('competitive_benchmarks', {}))}
 
             <h2 class="section-header">🎯 Performance Insights</h2>
             <div class="insights-grid">
@@ -458,6 +524,138 @@ class EnhancedHTMLGenerator:
                         <td>{item['change']}</td>
                         <td><span class="metric-change positive">{item['growth']}</span></td>
                     </tr>"""
+        return html
+
+    def _build_prioritized_recommendations_html(self, recommendations: List[Dict]) -> str:
+        """Build Phase 3 prioritized recommendations HTML"""
+        if not recommendations:
+            return "<p>No recommendations available</p>"
+
+        html = '<div class="priority-recommendations">'
+
+        for rec in recommendations:
+            priority = rec.get('priority', 'STRATEGIC')
+            priority_class = priority.lower().replace(' ', '-')
+            final_score = rec.get('final_score', 0)
+            impact_score = rec.get('impact_score', 0)
+            effort_score = rec.get('effort_score', 0)
+            roi_score = rec.get('roi_score', 0)
+
+            html += f'''
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <div class="rec-title">
+                            <h3>{rec.get('title', 'Recommendation')}</h3>
+                            <span class="priority-badge {priority_class}">{priority}</span>
+                        </div>
+                        <div class="rec-score">
+                            <div class="score-circle">{final_score:.1f}</div>
+                            <div class="score-label">Priority Score</div>
+                        </div>
+                    </div>
+                    <p class="rec-description">{rec.get('description', '')}</p>
+                    <div class="rec-metrics">
+                        <div class="metric">
+                            <span class="metric-label">Impact</span>
+                            <span class="metric-value">{impact_score:.1f}/10</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Effort</span>
+                            <span class="metric-value">{effort_score}/10</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">ROI</span>
+                            <span class="metric-value">{roi_score:.1f}</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-label">Timeline</span>
+                            <span class="metric-value">{rec.get('timeline', 'N/A')}</span>
+                        </div>
+                    </div>
+                    <div class="rec-impact">
+                        <strong>Expected Impact:</strong> {rec.get('expected_impact', 'N/A')}
+                    </div>
+                </div>'''
+
+        html += '</div>'
+        return html
+
+    def _build_competitive_benchmarking_html(self, benchmarks: Dict) -> str:
+        """Build Phase 3 competitive benchmarking HTML"""
+        if not benchmarks:
+            return ""
+
+        overall_score = benchmarks.get('overall_score', 0)
+        industry = benchmarks.get('industry', 'general').title()
+
+        # Determine rating and color
+        if overall_score >= 80:
+            rating = "Industry Leader"
+            rating_class = "leader"
+        elif overall_score >= 70:
+            rating = "Above Average"
+            rating_class = "above-average"
+        elif overall_score >= 60:
+            rating = "Average"
+            rating_class = "average"
+        elif overall_score >= 50:
+            rating = "Below Average"
+            rating_class = "below-average"
+        else:
+            rating = "Needs Improvement"
+            rating_class = "needs-improvement"
+
+        html = f'''
+            <div class="competitive-section">
+                <h2 class="section-header">🏆 Competitive Benchmarking</h2>
+                <div class="benchmark-card">
+                    <div class="benchmark-header">
+                        <div class="benchmark-score-display">
+                            <div class="large-score-circle {rating_class}">
+                                {overall_score}
+                            </div>
+                            <div class="score-details">
+                                <h3>{rating}</h3>
+                                <p>vs {industry} Industry</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="benchmark-grid">
+                        <div class="benchmark-box strengths">
+                            <h4>💪 Competitive Strengths</h4>
+                            <ul>'''
+
+        for strength in benchmarks.get('strengths', [])[:5]:
+            html += f'<li>{strength}</li>'
+
+        html += '''
+                            </ul>
+                        </div>
+                        <div class="benchmark-box weaknesses">
+                            <h4>⚠️ Areas Behind Competition</h4>
+                            <ul>'''
+
+        for weakness in benchmarks.get('weaknesses', [])[:5]:
+            html += f'<li>{weakness}</li>'
+
+        html += '''
+                            </ul>
+                        </div>
+                        <div class="benchmark-box opportunities">
+                            <h4>🎯 Growth Opportunities</h4>
+                            <ul>'''
+
+        for opportunity in benchmarks.get('opportunities', [])[:5]:
+            html += f'<li>{opportunity}</li>'
+
+        html += '''
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>'''
+
         return html
     
     def _get_premium_css(self) -> str:
@@ -924,6 +1122,307 @@ class EnhancedHTMLGenerator:
         .metric-change.positive {
             background: #48bb7820;
             color: #48bb78;
+        }
+
+        /* ============ PHASE 3: PRIORITIZATION & BENCHMARKING STYLES ============ */
+
+        .priority-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-badge.quick-win {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .stat-badge.high-impact {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stat-badge.strategic {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .priority-recommendations {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .recommendation-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .rec-title {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rec-title h3 {
+            font-size: 18px;
+            margin: 0;
+            color: #2d3748;
+        }
+
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .priority-badge.quick-win {
+            background: #48bb78;
+            color: white;
+        }
+
+        .priority-badge.high-impact {
+            background: #667eea;
+            color: white;
+        }
+
+        .priority-badge.strategic {
+            background: #f39c12;
+            color: white;
+        }
+
+        .rec-score {
+            text-align: center;
+        }
+
+        .score-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 800;
+            margin: 0 auto 5px;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: #718096;
+            font-weight: 600;
+        }
+
+        .rec-description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #4a5568;
+            margin-bottom: 15px;
+        }
+
+        .rec-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .rec-metrics .metric {
+            text-align: center;
+        }
+
+        .rec-metrics .metric-label {
+            display: block;
+            font-size: 11px;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .rec-metrics .metric-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        .rec-impact {
+            font-size: 14px;
+            color: #4a5568;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 6px;
+        }
+
+        /* Competitive Benchmarking Styles */
+        .competitive-section {
+            margin: 40px 0;
+        }
+
+        .benchmark-card {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .benchmark-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .benchmark-score-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .large-score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            font-weight: 800;
+            color: white;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .large-score-circle.leader {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .large-score-circle.above-average {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .large-score-circle.average {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .large-score-circle.below-average {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+
+        .large-score-circle.needs-improvement {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .score-details {
+            text-align: left;
+        }
+
+        .score-details h3 {
+            font-size: 32px;
+            margin: 0 0 5px 0;
+            color: #2d3748;
+        }
+
+        .score-details p {
+            font-size: 16px;
+            color: #718096;
+            margin: 0;
+        }
+
+        .benchmark-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .benchmark-box {
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+
+        .benchmark-box.strengths {
+            background: linear-gradient(135deg, #48bb7815 0%, #48bb7825 100%);
+            border-left-color: #48bb78;
+        }
+
+        .benchmark-box.weaknesses {
+            background: linear-gradient(135deg, #dc262615 0%, #dc262625 100%);
+            border-left-color: #dc2626;
+        }
+
+        .benchmark-box.opportunities {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left-color: #667eea;
+        }
+
+        .benchmark-box h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .benchmark-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .benchmark-box li {
+            padding: 8px 0;
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.5;
+        }
+
+        .benchmark-box.strengths li::before {
+            content: '✅ ';
+            margin-right: 8px;
+        }
+
+        .benchmark-box.weaknesses li::before {
+            content: '⚠️ ';
+            margin-right: 8px;
+        }
+
+        .benchmark-box.opportunities li::before {
+            content: '🎯 ';
+            margin-right: 8px;
         }
 
         @media (max-width: 768px) {

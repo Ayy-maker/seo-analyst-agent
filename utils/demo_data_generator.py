@@ -461,13 +461,24 @@ class DemoDataGenerator:
         mobile_heavy_industries = ['automotive', 'restaurant', 'healthcare', 'beauty', 'fitness']
 
         if industry in mobile_heavy_industries:
+            # Mobile-heavy: 65-72% mobile, remaining split between desktop/tablet
             mobile = round(random.uniform(65, 72), 1)
-            desktop = round(random.uniform(25, 32), 1)
+            remaining = 100 - mobile
+            desktop = round(remaining * random.uniform(0.75, 0.85), 1)  # 75-85% of remaining
+            tablet = round(100 - mobile - desktop, 1)
         else:
+            # Desktop-heavy: 45-55% mobile, 38-48% desktop, rest tablet
             mobile = round(random.uniform(45, 55), 1)
-            desktop = round(random.uniform(40, 50), 1)
+            desktop = round(random.uniform(38, 48), 1)
+            tablet = round(100 - mobile - desktop, 1)
 
-        tablet = round(100 - mobile - desktop, 1)
+        # Ensure tablet is never negative (defensive fix)
+        if tablet < 0:
+            tablet = 0
+            # Recalculate to ensure percentages sum to 100
+            total = mobile + desktop
+            mobile = round((mobile / total) * 100, 1)
+            desktop = round(100 - mobile, 1)
 
         return {
             'mobile': mobile,
