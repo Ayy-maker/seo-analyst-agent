@@ -4,6 +4,8 @@ from .visualizations import ChartGenerator
 from .pdf_styles import PDFStyles
 from .industry_detector import industry_detector, IndustryDetector
 from .demo_data_generator import demo_data_generator, DemoDataGenerator
+from .prioritization_engine import prioritization_engine, PrioritizationEngine
+from .competitive_benchmarks import competitive_benchmarks, CompetitiveBenchmarks
 
 __all__ = [
     'ChartGenerator',
@@ -11,5 +13,9 @@ __all__ = [
     'industry_detector',
     'IndustryDetector',
     'demo_data_generator',
-    'DemoDataGenerator'
+    'DemoDataGenerator',
+    'prioritization_engine',
+    'PrioritizationEngine',
+    'competitive_benchmarks',
+    'CompetitiveBenchmarks'
 ]

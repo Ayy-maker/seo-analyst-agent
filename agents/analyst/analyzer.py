@@ -14,13 +14,24 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'utils'))
 from industry_detector import industry_detector
 from .prompts import IndustryAwarePrompts
 
+# Import Phase 3 enhancements
+from prioritization_engine import prioritization_engine
+from competitive_benchmarks import competitive_benchmarks
+
 
 class AnalystAgent:
     """
-    Main Analyst Agent with Phase 2 AI Enhancements
+    Main Analyst Agent with Phase 2 & 3 Enhancements
+
+    Phase 2: AI Intelligence
     - Industry-aware analysis using Claude Sonnet 4.5
     - Advanced pattern recognition
-    - Strategic recommendations with ROI estimates
+    - Strategic recommendations
+
+    Phase 3: Business Intelligence
+    - Prioritization engine for recommendations
+    - Competitive benchmarking against industry standards
+    - Performance scoring and gap analysis
     """
 
     def __init__(self, api_key: str, config_path: str = "config"):
@@ -32,6 +43,10 @@ class AnalystAgent:
         # Phase 2: Add industry-aware prompts
         self.industry_prompts = IndustryAwarePrompts()
         self.industry_detector = industry_detector
+
+        # Phase 3: Add business intelligence systems
+        self.prioritization_engine = prioritization_engine
+        self.competitive_benchmarks = competitive_benchmarks
 
         # Initialize module analyzers
         self.keywords_analyzer = KeywordsAnalyzer(self.config, self.prompts)
@@ -337,3 +352,121 @@ Keep it concise and actionable.
         insights['opportunities_text'] = opportunities_section.strip()
 
         return insights
+
+    # ========== Phase 3: Business Intelligence Methods ==========
+
+    def generate_comprehensive_analysis(self,
+                                       data: Dict[str, Any],
+                                       company_name: str) -> Dict[str, Any]:
+        """
+        Generate complete analysis with all Phase 2 & 3 features
+
+        Args:
+            data: SEO performance data
+            company_name: Name of the company
+
+        Returns:
+            Comprehensive analysis dictionary with all components
+        """
+        # Detect industry
+        industry = self.industry_detector.detect_industry(company_name, data)
+
+        # Generate all Phase 2 components
+        executive_summary = self.generate_executive_summary(data, company_name)
+        recommendations = self.generate_strategic_recommendations(data, company_name)
+        insights = self.generate_performance_insights(data, company_name)
+
+        # Phase 3: Prioritize recommendations
+        prioritized_recommendations = self.prioritization_engine.prioritize_recommendations(recommendations)
+        priority_summary = self.prioritization_engine.get_priority_summary(prioritized_recommendations)
+
+        # Phase 3: Competitive benchmarking
+        benchmark_comparison = self.competitive_benchmarks.compare_performance(data, industry)
+
+        return {
+            'industry': industry,
+            'executive_summary': executive_summary,
+            'recommendations': prioritized_recommendations,
+            'priority_summary': priority_summary,
+            'performance_insights': insights,
+            'competitive_benchmarks': benchmark_comparison,
+            'metadata': {
+                'total_recommendations': len(prioritized_recommendations),
+                'quick_wins': priority_summary['breakdown']['quick_wins'],
+                'high_impact': priority_summary['breakdown']['high_impact'],
+                'competitive_score': benchmark_comparison['overall_score']
+            }
+        }
+
+    def get_prioritized_recommendations(self,
+                                       data: Dict[str, Any],
+                                       company_name: str) -> Dict[str, Any]:
+        """
+        Get recommendations with prioritization and scoring
+
+        Args:
+            data: SEO performance data
+            company_name: Name of the company
+
+        Returns:
+            Dictionary with prioritized recommendations and summary
+        """
+        # Generate recommendations using Phase 2 AI
+        recommendations = self.generate_strategic_recommendations(data, company_name)
+
+        # Prioritize using Phase 3 engine
+        prioritized = self.prioritization_engine.prioritize_recommendations(recommendations)
+        summary = self.prioritization_engine.get_priority_summary(prioritized)
+
+        return {
+            'recommendations': prioritized,
+            'summary': summary,
+            'quick_wins': [r for r in prioritized if r.get('priority') == 'QUICK WIN'],
+            'high_impact': [r for r in prioritized if r.get('priority') == 'HIGH IMPACT'],
+            'strategic': [r for r in prioritized if r.get('priority') == 'STRATEGIC']
+        }
+
+    def get_competitive_analysis(self,
+                                data: Dict[str, Any],
+                                company_name: str) -> Dict[str, Any]:
+        """
+        Get competitive benchmark analysis
+
+        Args:
+            data: SEO performance data
+            company_name: Name of the company
+
+        Returns:
+            Comprehensive competitive analysis
+        """
+        # Detect industry
+        industry = self.industry_detector.detect_industry(company_name, data)
+
+        # Compare against benchmarks
+        comparison = self.competitive_benchmarks.compare_performance(data, industry)
+
+        # Generate AI-powered competitive intelligence (Phase 2)
+        ai_analysis = self.generate_competitive_analysis(data, company_name)
+
+        return {
+            'benchmark_comparison': comparison,
+            'ai_insights': ai_analysis,
+            'overall_score': comparison['overall_score'],
+            'rating': self._get_competitive_rating(comparison['overall_score']),
+            'strengths': comparison['strengths'],
+            'weaknesses': comparison['weaknesses'],
+            'opportunities': comparison['opportunities']
+        }
+
+    def _get_competitive_rating(self, score: int) -> str:
+        """Convert competitive score to rating"""
+        if score >= 80:
+            return 'Industry Leader'
+        elif score >= 70:
+            return 'Above Average'
+        elif score >= 60:
+            return 'Average'
+        elif score >= 50:
+            return 'Below Average'
+        else:
+            return 'Needs Improvement'
