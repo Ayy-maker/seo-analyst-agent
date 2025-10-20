@@ -17,6 +17,7 @@ kaleido>=0.2.1
 google-api-python-client>=2.100.0
 google-auth-httplib2>=0.1.1
 google-auth-oauthlib>=1.1.0
+google-analytics-data>=0.17.0
 schedule>=1.2.0
 
 # Phase 4: Historical Intelligence & Advanced Analytics
