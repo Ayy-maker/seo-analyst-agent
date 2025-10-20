@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - SEO Intelligence Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .nav {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-card {
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .status-card.connected {
+            border-color: #4caf50;
+            background: #f1f8f1;
+        }
+
+        .status-card.warning {
+            border-color: #ff9800;
+            background: #fff8f1;
+        }
+
+        .status-card.error {
+            border-color: #f44336;
+            background: #fff1f1;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .status-icon {
+            font-size: 28px;
+        }
+
+        .status-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-value {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .status-list {
+            list-style: none;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .status-list li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .status-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-help {
+            font-size: 14px;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .setup-guide {
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-top: 20px;
+        }
+
+        .setup-guide h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .setup-guide ol {
+            margin-left: 20px;
+        }
+
+        .setup-guide li {
+            margin: 8px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigation -->
+        <div class="nav">
+            <a href="{{ url_for('index') }}" class="nav-link">
+                📤 Upload
+            </a>
+            <a href="{{ url_for('view_reports') }}" class="nav-link">
+                📊 Reports
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="nav-link">
+                📈 Dashboard
+            </a>
+            <a href="{{ url_for('competitor_analysis') }}" class="nav-link">
+                🎯 Competitors
+            </a>
+            <a href="{{ url_for('settings') }}" class="nav-link active">
+                ⚙️ Settings
+            </a>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>⚙️ Settings</h1>
+            <p>Configure Google API Automation</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Connection Status -->
+        <div class="card">
+            <h2 class="section-title">🔌 Connection Status</h2>
+
+            <div class="status-grid">
+                <!-- Service Account Status -->
+                <div class="status-card {% if service_account_exists %}connected{% else %}error{% endif %}">
+                    <div class="status-header">
+                        <div class="status-icon">{% if service_account_exists %}✅{% else %}❌{% endif %}</div>
+                        <div class="status-title">Service Account</div>
+                    </div>
+                    <div class="status-value">
+                        {% if service_account_exists %}
+                            File: config/credentials/service_account.json
+                        {% else %}
+                            Not configured
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- GSC Status -->
+                <div class="status-card {% if 'Connected' in gsc_status %}connected{% elif gsc_status == 'Not configured' %}error{% else %}warning{% endif %}">
+                    <div class="status-header">
+                        <div class="status-icon">{% if 'Connected' in gsc_status %}✅{% elif gsc_status == 'Not configured' %}❌{% else %}⚠️{% endif %}</div>
+                        <div class="status-title">Google Search Console</div>
+                    </div>
+                    <div class="status-value">{{ gsc_status }}</div>
+                    {% if gsc_sites %}
+                        <ul class="status-list">
+                            {% for site in gsc_sites[:3] %}
+                                <li>{{ site }}</li>
+                            {% endfor %}
+                            {% if gsc_sites|length > 3 %}
+                                <li>+ {{ gsc_sites|length - 3 }} more</li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <!-- GA4 Status -->
+                <div class="status-card {% if 'Connected' in ga4_status %}connected{% elif ga4_status == 'Not configured' %}error{% else %}warning{% endif %}">
+                    <div class="status-header">
+                        <div class="status-icon">{% if 'Connected' in ga4_status %}✅{% elif ga4_status == 'Not configured' %}❌{% else %}⚠️{% endif %}</div>
+                        <div class="status-title">Google Analytics 4</div>
+                    </div>
+                    <div class="status-value">{{ ga4_status }}</div>
+                    {% if ga4_property %}
+                        <div class="status-value" style="font-size: 12px; margin-top: 5px;">
+                            Property: {{ ga4_property }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- GA4 Configuration -->
+        <div class="card">
+            <h2 class="section-title">📈 Google Analytics 4 Configuration</h2>
+
+            <form method="POST" action="{{ url_for('settings') }}">
+                <div class="form-group">
+                    <label class="form-label" for="ga4_property_id">GA4 Property ID</label>
+                    <input
+                        type="text"
+                        id="ga4_property_id"
+                        name="ga4_property_id"
+                        class="form-input"
+                        placeholder="123456789 or properties/123456789"
+                        value="{{ ga4_property if ga4_property else '' }}"
+                    >
+                    <div class="form-help">
+                        Find this in Google Analytics → Admin → Property Settings → Property ID
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">💾 Save Settings</button>
+            </form>
+        </div>
+
+        <!-- Setup Guide -->
+        {% if not service_account_exists %}
+        <div class="card">
+            <h2 class="section-title">📋 Quick Setup Guide</h2>
+
+            <div class="setup-guide">
+                <h3>🚀 To enable automation:</h3>
+                <ol>
+                    <li>Follow the comprehensive guide in <strong>SERVICE_ACCOUNT_SETUP.md</strong></li>
+                    <li>Create service account in Google Cloud Console</li>
+                    <li>Download JSON key file</li>
+                    <li>Upload to: <code>config/credentials/service_account.json</code></li>
+                    <li>Grant access in Google Search Console</li>
+                    <li>Grant access in Google Analytics 4</li>
+                    <li>Set GA4 Property ID above</li>
+                    <li>Test connection with: <code>python3 test_service_account.py</code></li>
+                </ol>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

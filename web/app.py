@@ -23,6 +23,16 @@ from agents.analyst.competitor_analyzer import CompetitorAnalyzer
 from utils.data_normalizer import data_normalizer
 from datetime import datetime
 
+# Google API clients for automated data fetching
+try:
+    sys.path.insert(0, str(Path(__file__).parent.parent / 'integrations'))
+    from gsc_api_client import GSCAPIClient
+    from ga4_api_client import GA4APIClient
+    GOOGLE_APIS_AVAILABLE = True
+except ImportError:
+    GOOGLE_APIS_AVAILABLE = False
+    print("⚠️  Google API clients not available. Service account automation disabled.")
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -46,6 +56,112 @@ ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls', 'docx', 'doc', 'pdf', 'jpg', 'jpeg',
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# ============== AUTOMATION HELPERS ==============
+
+def auto_fetch_google_data(company_name: str, domain: str = None) -> dict:
+    """
+    Automatically fetch GSC and GA4 data using service account
+
+    Args:
+        company_name: Company name for reporting
+        domain: Website domain (optional, will try to detect from GSC sites)
+
+    Returns:
+        dict with 'gsc_data' and 'ga4_data' keys
+    """
+    result = {
+        'gsc_data': None,
+        'ga4_data': None,
+        'gsc_error': None,
+        'ga4_error': None,
+        'gsc_fetched': False,
+        'ga4_fetched': False
+    }
+
+    if not GOOGLE_APIS_AVAILABLE:
+        result['gsc_error'] = "Google API clients not installed"
+        result['ga4_error'] = "Google API clients not installed"
+        return result
+
+    # Try to fetch GSC data
+    try:
+        gsc_client = GSCAPIClient()
+
+        if gsc_client.connect():
+            print(f"✅ GSC Connected via {gsc_client.auth_method}")
+
+            # List available sites
+            sites = gsc_client.list_sites()
+
+            if not sites:
+                result['gsc_error'] = "No GSC sites found. Add service account to GSC."
+            else:
+                # Use first site or try to find matching domain
+                target_site = sites[0]
+                if domain:
+                    for site in sites:
+                        if domain in site:
+                            target_site = site
+                            break
+
+                print(f"📊 Fetching GSC data from: {target_site}")
+
+                # Fetch 30 days of data
+                queries = gsc_client.fetch_queries_with_metrics(target_site, days=30)
+
+                if queries:
+                    # Convert to format expected by normalizer
+                    gsc_parsed = {
+                        'source': 'Google Search Console',
+                        'site_url': target_site,
+                        'record_count': len(queries),
+                        'data': queries
+                    }
+                    result['gsc_data'] = gsc_parsed
+                    result['gsc_fetched'] = True
+                    print(f"✅ Fetched {len(queries)} GSC queries")
+                else:
+                    result['gsc_error'] = "No GSC data available for selected site"
+        else:
+            result['gsc_error'] = "GSC connection failed. Check service account setup."
+    except Exception as e:
+        result['gsc_error'] = f"GSC error: {str(e)}"
+        print(f"❌ GSC Error: {e}")
+
+    # Try to fetch GA4 data
+    try:
+        ga4_client = GA4APIClient()
+
+        if not ga4_client.property_id:
+            result['ga4_error'] = "GA4 Property ID not set"
+        elif ga4_client.connect():
+            print(f"✅ GA4 Connected via {ga4_client.auth_method}")
+
+            # Fetch 30 days of data
+            behavior_data = ga4_client.fetch_user_behavior(days=30)
+
+            if 'error' not in behavior_data:
+                # Convert to format expected by normalizer
+                ga4_parsed = {
+                    'source': 'Google Analytics 4',
+                    'property_id': ga4_client.property_id,
+                    'record_count': behavior_data.get('total_rows', 0),
+                    'data': behavior_data.get('data', [])
+                }
+                result['ga4_data'] = ga4_parsed
+                result['ga4_fetched'] = True
+                print(f"✅ Fetched {behavior_data.get('total_rows', 0)} days of GA4 data")
+            else:
+                result['ga4_error'] = behavior_data.get('error', 'Unknown GA4 error')
+        else:
+            result['ga4_error'] = "GA4 connection failed. Check service account setup."
+    except Exception as e:
+        result['ga4_error'] = f"GA4 error: {str(e)}"
+        print(f"❌ GA4 Error: {e}")
+
+    return result
 
 
 # ============== ROUTES ==============
@@ -163,6 +279,7 @@ def upload_batch():
             ga4_metrics = None
 
             source = parsed_data.get('source', 'Unknown')
+            is_semrush = 'semrush' in source.lower() or 'keyword' in parsed_data.get('type', '').lower()
 
             if source == 'Google Search Console':
                 normalized_data = data_normalizer.normalize_gsc_data(parsed_data, company_name)
@@ -170,6 +287,22 @@ def upload_batch():
                 ga4_metrics = data_normalizer.normalize_ga4_data(parsed_data)
                 # If we have GA4 but no GSC, we can't generate full report - use demo GSC with GA4
                 normalized_data = None  # Will use demo data, but with GA4 metrics added
+
+            # 🚀 AUTO-FETCH GOOGLE DATA if SEMrush detected but GSC/GA4 missing
+            if is_semrush and not (normalized_data and ga4_metrics):
+                print(f"\n🚀 Auto-fetching Google data for {company_name}...")
+
+                auto_data = auto_fetch_google_data(company_name)
+
+                # Process GSC data if fetched
+                if auto_data['gsc_fetched'] and auto_data['gsc_data']:
+                    if not normalized_data:
+                        normalized_data = data_normalizer.normalize_gsc_data(auto_data['gsc_data'], company_name)
+
+                # Process GA4 data if fetched
+                if auto_data['ga4_fetched'] and auto_data['ga4_data']:
+                    if not ga4_metrics:
+                        ga4_metrics = data_normalizer.normalize_ga4_data(auto_data['ga4_data'])
 
             # If we have both GSC and GA4, merge them
             if normalized_data and ga4_metrics:
@@ -336,6 +469,7 @@ def upload_file():
         # Try to normalize GSC and GA4 data from all uploaded files
         normalized_data = None
         ga4_metrics = None
+        has_semrush = False
 
         # Look for GSC and GA4 data in all parsed files
         for parsed in all_parsed_data:
@@ -345,6 +479,31 @@ def upload_file():
                 normalized_data = data_normalizer.normalize_gsc_data(parsed, company_name)
             elif source == 'Google Analytics 4' and not ga4_metrics:
                 ga4_metrics = data_normalizer.normalize_ga4_data(parsed)
+            elif 'semrush' in source.lower() or 'keyword' in parsed.get('type', '').lower():
+                has_semrush = True
+
+        # 🚀 AUTO-FETCH GOOGLE DATA if SEMrush detected but GSC/GA4 missing
+        if has_semrush and not (normalized_data and ga4_metrics):
+            print(f"\n🚀 Auto-fetching Google data for {company_name}...")
+            flash('🚀 Automatically fetching Google Search Console and Analytics data...', 'info')
+
+            auto_data = auto_fetch_google_data(company_name)
+
+            # Process GSC data if fetched
+            if auto_data['gsc_fetched'] and auto_data['gsc_data']:
+                if not normalized_data:
+                    normalized_data = data_normalizer.normalize_gsc_data(auto_data['gsc_data'], company_name)
+                    flash('✅ Google Search Console data fetched automatically!', 'success')
+            elif auto_data['gsc_error']:
+                flash(f"⚠️ GSC auto-fetch: {auto_data['gsc_error']}", 'warning')
+
+            # Process GA4 data if fetched
+            if auto_data['ga4_fetched'] and auto_data['ga4_data']:
+                if not ga4_metrics:
+                    ga4_metrics = data_normalizer.normalize_ga4_data(auto_data['ga4_data'])
+                    flash('✅ Google Analytics 4 data fetched automatically!', 'success')
+            elif auto_data['ga4_error']:
+                flash(f"⚠️ GA4 auto-fetch: {auto_data['ga4_error']}", 'warning')
 
         # If we have both GSC and GA4, merge them
         if normalized_data and ga4_metrics:
@@ -748,6 +907,72 @@ def api_client_stats(client_id):
     """API: Get client stats"""
     stats = db.get_client_stats(client_id)
     return jsonify(stats)
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    """Settings page for API configuration"""
+    if request.method == 'POST':
+        # Update GA4 Property ID
+        property_id = request.form.get('ga4_property_id', '').strip()
+
+        if property_id:
+            try:
+                from integrations.ga4_api_client import ga4_api_client
+                ga4_api_client.set_property_id(property_id)
+                flash('✅ GA4 Property ID saved successfully!', 'success')
+            except Exception as e:
+                flash(f'❌ Error saving Property ID: {str(e)}', 'error')
+        else:
+            flash('⚠️ Please provide a GA4 Property ID', 'warning')
+
+        return redirect(url_for('settings'))
+
+    # GET: Show current settings
+    try:
+        from integrations.gsc_api_client import GSCAPIClient
+        from integrations.ga4_api_client import GA4APIClient
+        from pathlib import Path
+
+        # Check service account status
+        sa_path = Path(__file__).parent.parent / 'config' / 'credentials' / 'service_account.json'
+        service_account_exists = sa_path.exists()
+
+        # Check GSC connection
+        gsc_status = "Not configured"
+        gsc_sites = []
+        if service_account_exists:
+            try:
+                gsc_client = GSCAPIClient()
+                if gsc_client.connect():
+                    gsc_status = f"Connected ({gsc_client.auth_method})"
+                    gsc_sites = gsc_client.list_sites()
+            except:
+                gsc_status = "Error connecting"
+
+        # Check GA4 connection
+        ga4_status = "Not configured"
+        ga4_property = None
+        if service_account_exists:
+            try:
+                ga4_client = GA4APIClient()
+                ga4_property = ga4_client.property_id
+                if ga4_client.connect():
+                    ga4_status = f"Connected ({ga4_client.auth_method})"
+                elif not ga4_property:
+                    ga4_status = "Property ID not set"
+            except:
+                ga4_status = "Error connecting"
+
+        return render_template('settings.html',
+                             service_account_exists=service_account_exists,
+                             gsc_status=gsc_status,
+                             gsc_sites=gsc_sites,
+                             ga4_status=ga4_status,
+                             ga4_property=ga4_property)
+    except Exception as e:
+        flash(f'Error loading settings: {str(e)}', 'error')
+        return redirect(url_for('index'))
 
 
 def _create_sample_insights(parsed_data):
