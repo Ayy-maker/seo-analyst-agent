@@ -3,10 +3,19 @@ Enhanced HTML Report Generator - 10x Better!
 Includes interactive charts, animations, and comprehensive month-over-month tracking
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Any
 import json
+import sys
+
+# Add parent directories to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+# Import directly from module files to avoid matplotlib dependency
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'utils'))
+
+from industry_detector import industry_detector
+from demo_data_generator import demo_data_generator
 
 
 class EnhancedHTMLGenerator:
@@ -28,16 +37,16 @@ class EnhancedHTMLGenerator:
                             seo_data: Dict[str, Any] = None,
                             filename: str = None) -> str:
         """Generate complete enhanced HTML report with charts"""
-        
+
         if filename is None:
             timestamp = datetime.now().strftime('%Y-%m-%d-%H%M%S')
             filename = f"seo-report-{company_name.replace(' ', '-').lower()}-{timestamp}.html"
-        
+
         output_path = self.output_dir / filename
-        
-        # Use default data if none provided
+
+        # Use default data if none provided - NOW WITH INDUSTRY INTELLIGENCE
         if seo_data is None:
-            seo_data = self._get_default_data()
+            seo_data = self._get_default_data(company_name)
         
         # Generate HTML with Chart.js
         html_content = self._generate_enhanced_html(company_name, report_period, seo_data)
@@ -49,38 +58,96 @@ class EnhancedHTMLGenerator:
         # Return absolute path
         return str(output_path.resolve())
     
-    def _get_default_data(self) -> Dict[str, Any]:
-        """Get default sample data with monthly progress"""
+    def _get_default_data(self, company_name: str = "Sample Company") -> Dict[str, Any]:
+        """Get intelligent demo data based on industry detection"""
+
+        # Detect industry from company name
+        industry = industry_detector.detect_industry(company_name)
+
+        # Extract location if present
+        location = industry_detector.get_location_from_name(company_name) or 'Sydney'
+
+        # Generate complete realistic dataset
+        demo_dataset = demo_data_generator.generate_complete_dataset(
+            industry=industry,
+            location=location,
+            historical_months=7
+        )
+
+        # Convert to format expected by template
+        totals = demo_dataset['totals']
+        keywords = demo_dataset['keywords'][:5]  # Top 5
+
+        # Map performance levels based on CTR
+        def get_performance(ctr):
+            if ctr >= 6:
+                return 'Excellent'
+            elif ctr >= 4:
+                return 'Good'
+            else:
+                return 'Improving'
+
         return {
             'kpis': {
-                'total_clicks': {'value': 258, 'change': 286, 'prev': 67},
-                'impressions': {'value': 8700, 'change': 412, 'prev': 1698},
-                'ctr': {'value': 2.97, 'change': 25, 'prev': 2.4},
-                'avg_position': {'value': 18.4, 'change': 40, 'prev': 30.7}
+                'total_clicks': {'value': totals['clicks'], 'change': 286, 'prev': int(totals['clicks'] * 0.26)},
+                'impressions': {'value': totals['impressions'], 'change': 412, 'prev': int(totals['impressions'] * 0.20)},
+                'ctr': {'value': totals['ctr'], 'change': 25, 'prev': round(totals['ctr'] * 0.8, 2)},
+                'avg_position': {'value': totals['avg_position'], 'change': 40, 'prev': round(totals['avg_position'] * 1.67, 1)}
             },
             'top_queries': [
-                {'rank': i+1, 'query': f'sample keyword {i+1}', 'clicks': 89-i*10, 'impressions': 1247+i*200, 'ctr': 7.1-i*0.5, 'position': 2.3+i*2, 'performance': ['Excellent', 'Good', 'Good', 'Good', 'Improving'][i]}
-                for i in range(5)
+                {
+                    'rank': i+1,
+                    'query': kw['query'],
+                    'clicks': kw['clicks'],
+                    'impressions': kw['impressions'],
+                    'ctr': kw['ctr'],
+                    'position': kw['position'],
+                    'performance': get_performance(kw['ctr'])
+                }
+                for i, kw in enumerate(keywords)
             ],
             'landing_pages': [
-                {'url': '/', 'label': 'Homepage', 'clicks': 134, 'change': 298, 'impressions': 4523, 'ctr': 3.0, 'position': 8.2},
-                {'url': '/services/', 'label': 'Services', 'clicks': 47, 'change': 385, 'impressions': 2167, 'ctr': 2.2, 'position': 16.4},
-                {'url': '/products/', 'label': 'Products', 'clicks': 28, 'change': 450, 'impressions': 1234, 'ctr': 2.3, 'position': 18.7},
-                {'url': '/about/', 'label': 'About', 'clicks': 22, 'change': 420, 'impressions': 987, 'ctr': 2.2, 'position': 21.5},
+                {
+                    'url': page['url'],
+                    'label': page['name'],
+                    'clicks': page['clicks'],
+                    'change': page['growth'],
+                    'impressions': page['impressions'],
+                    'ctr': page['ctr'],
+                    'position': page['position']
+                }
+                for page in demo_dataset['landing_pages'][:4]  # Top 4 pages
             ],
             'devices': [
-                {'device': 'Mobile', 'icon': '📱', 'clicks': 175, 'percentage': 67.8},
-                {'device': 'Desktop', 'icon': '💻', 'clicks': 74, 'percentage': 28.7},
-                {'device': 'Tablet', 'icon': '📟', 'clicks': 9, 'percentage': 3.5},
+                {
+                    'device': 'Mobile',
+                    'icon': '📱',
+                    'clicks': int(totals['clicks'] * (demo_dataset['devices']['mobile'] / 100)),
+                    'percentage': demo_dataset['devices']['mobile']
+                },
+                {
+                    'device': 'Desktop',
+                    'icon': '💻',
+                    'clicks': int(totals['clicks'] * (demo_dataset['devices']['desktop'] / 100)),
+                    'percentage': demo_dataset['devices']['desktop']
+                },
+                {
+                    'device': 'Tablet',
+                    'icon': '📟',
+                    'clicks': int(totals['clicks'] * (demo_dataset['devices']['tablet'] / 100)),
+                    'percentage': demo_dataset['devices']['tablet']
+                },
             ],
             'monthly_progress': [
-                {'month': 'March', 'clicks': 67, 'impressions': 1698, 'ctr': 2.4, 'position': 30.7, 'health': 72},
-                {'month': 'April', 'clicks': 89, 'impressions': 2854, 'ctr': 2.5, 'position': 28.3, 'health': 75},
-                {'month': 'May', 'clicks': 124, 'impressions': 4123, 'ctr': 2.6, 'position': 25.1, 'health': 78},
-                {'month': 'June', 'clicks': 167, 'impressions': 5892, 'ctr': 2.7, 'position': 22.4, 'health': 82},
-                {'month': 'July', 'clicks': 208, 'impressions': 7234, 'ctr': 2.8, 'position': 20.1, 'health': 85},
-                {'month': 'August', 'clicks': 232, 'impressions': 7989, 'ctr': 2.9, 'position': 19.2, 'health': 86},
-                {'month': 'September', 'clicks': 258, 'impressions': 8701, 'ctr': 3.0, 'position': 18.4, 'health': 87},
+                {
+                    'month': (datetime.now() + timedelta(days=30*month['month_offset'])).strftime('%B'),
+                    'clicks': month['clicks'],
+                    'impressions': month['impressions'],
+                    'ctr': round((month['clicks'] / month['impressions']) * 100, 1),
+                    'position': round(totals['avg_position'] - (month['month_offset'] * 1.8), 1),  # Improving over time
+                    'health': month['health_score']
+                }
+                for month in demo_dataset['historical']
             ],
             'progress': [
                 {'metric': 'Total Clicks', 'previous': 67, 'current': 258, 'change': '+191', 'growth': '+286%'},
