@@ -63,3 +63,12 @@ Thumbs.db
 
 # Outputs (optional - may want to keep samples)
 # outputs/
+
+# Google API Credentials (NEVER COMMIT!)
+config/credentials/*.json
+config/credentials/client_secrets.json
+config/credentials/gsc_token.json
+config/credentials/ga4_token.json
+config/credentials/ga4_config.json
+config/credentials/api_keys.json
+config/credentials/service_account.json
