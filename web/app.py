@@ -158,16 +158,31 @@ def upload_batch():
             )
             db.save_insights(report_id, client_id, approved_insights)
 
-            # Normalize data if it's GSC CSV
+            # Normalize data based on source type
             normalized_data = None
-            if parsed_data.get('source') == 'Google Search Console':
+            ga4_metrics = None
+
+            source = parsed_data.get('source', 'Unknown')
+
+            if source == 'Google Search Console':
                 normalized_data = data_normalizer.normalize_gsc_data(parsed_data, company_name)
+            elif source == 'Google Analytics 4':
+                ga4_metrics = data_normalizer.normalize_ga4_data(parsed_data)
+                # If we have GA4 but no GSC, we can't generate full report - use demo GSC with GA4
+                normalized_data = None  # Will use demo data, but with GA4 metrics added
+
+            # If we have both GSC and GA4, merge them
+            if normalized_data and ga4_metrics:
+                normalized_data = data_normalizer.merge_gsc_and_ga4_data(normalized_data, ga4_metrics)
+            elif ga4_metrics and not normalized_data:
+                # GA4 only - we'll pass ga4_metrics to generator which can handle it
+                normalized_data = {'ga4_metrics': ga4_metrics}
 
             # Generate HTML report with REAL or DEMO data
             html_file = html_generator.generate_full_report(
                 company_name=company_name,
                 report_period=report_period,
-                seo_data=normalized_data  # Uses real data if GSC, otherwise demo
+                seo_data=normalized_data  # Uses real data if available, otherwise demo
             )
             
             # Store HTML file path in database
@@ -318,19 +333,31 @@ def upload_file():
         )
         db.save_insights(report_id, client_id, approved_insights)
 
-        # Try to normalize GSC data from consolidated data
+        # Try to normalize GSC and GA4 data from all uploaded files
         normalized_data = None
-        # Check if any file was GSC data
+        ga4_metrics = None
+
+        # Look for GSC and GA4 data in all parsed files
         for parsed in all_parsed_data:
-            if parsed.get('source') == 'Google Search Console':
+            source = parsed.get('source', 'Unknown')
+
+            if source == 'Google Search Console' and not normalized_data:
                 normalized_data = data_normalizer.normalize_gsc_data(parsed, company_name)
-                break  # Use first GSC file found
+            elif source == 'Google Analytics 4' and not ga4_metrics:
+                ga4_metrics = data_normalizer.normalize_ga4_data(parsed)
+
+        # If we have both GSC and GA4, merge them
+        if normalized_data and ga4_metrics:
+            normalized_data = data_normalizer.merge_gsc_and_ga4_data(normalized_data, ga4_metrics)
+        elif ga4_metrics and not normalized_data:
+            # GA4 only - use demo GSC data but include GA4 metrics
+            normalized_data = {'ga4_metrics': ga4_metrics}
 
         # Generate HTML report with REAL or DEMO data
         html_file = html_generator.generate_full_report(
             company_name=company_name,
             report_period=report_period,
-            seo_data=normalized_data  # Uses real data if GSC found, otherwise demo
+            seo_data=normalized_data  # Uses real data if available, otherwise demo
         )
         
         # Store HTML file path in database

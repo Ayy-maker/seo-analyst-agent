@@ -75,27 +75,37 @@ class CSVParser(BaseParser):
     def _detect_source(self, df: pd.DataFrame) -> str:
         """Detect data source from column patterns"""
         columns = [col.lower() for col in df.columns]
-        
+
         # Google Search Console patterns
         gsc_patterns = ['query', 'impressions', 'clicks', 'ctr', 'position']
         if all(pattern in columns for pattern in gsc_patterns):
             return "Google Search Console"
-        
+
+        # Google Analytics 4 patterns
+        ga4_patterns = ['users', 'sessions']
+        ga4_optional = ['engagement_rate', 'bounce_rate', 'page_views', 'avg_session_duration']
+
+        # Must have users and sessions, plus at least 2 other GA4 metrics
+        if all(pattern in columns for pattern in ga4_patterns):
+            ga4_count = sum(1 for pattern in ga4_optional if pattern in columns)
+            if ga4_count >= 2:
+                return "Google Analytics 4"
+
         # Ahrefs patterns
         ahrefs_patterns = ['domain_rating', 'url_rating']
         if any(pattern in columns for pattern in ahrefs_patterns):
             return "Ahrefs"
-        
+
         # SEMrush patterns
         semrush_patterns = ['keyword', 'position', 'search_volume']
         if all(pattern in columns for pattern in semrush_patterns):
             return "SEMrush"
-        
+
         # Screaming Frog patterns
         sf_patterns = ['address', 'status_code', 'indexability']
         if all(pattern in columns for pattern in sf_patterns):
             return "Screaming Frog"
-        
+
         return "Unknown"
     
     def _extract_date_range(self, df: pd.DataFrame) -> Dict[str, str]:

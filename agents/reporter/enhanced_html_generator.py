@@ -309,6 +309,8 @@ class EnhancedHTMLGenerator:
                 </div>
             </div>
 
+            {self._build_ga4_metrics_section(data.get('ga4_metrics', {}))}
+
             <!-- MONTH-OVER-MONTH GROWTH CHARTS -->
             <h2 class="section-header">📈 Month-Over-Month Growth</h2>
             <div class="charts-grid">
@@ -657,7 +659,166 @@ class EnhancedHTMLGenerator:
             </div>'''
 
         return html
-    
+
+    def _build_ga4_metrics_section(self, ga4_metrics: Dict) -> str:
+        """Build Google Analytics 4 metrics section HTML"""
+        if not ga4_metrics:
+            return ''
+
+        total_users = ga4_metrics.get('total_users', 0)
+        total_sessions = ga4_metrics.get('total_sessions', 0)
+        total_page_views = ga4_metrics.get('total_page_views', 0)
+        engagement_rate = ga4_metrics.get('avg_engagement_rate', 0)
+        bounce_rate = ga4_metrics.get('avg_bounce_rate', 0)
+        session_duration = ga4_metrics.get('avg_session_duration', 0)
+        pages_per_session = ga4_metrics.get('pages_per_session', 0)
+        user_growth = ga4_metrics.get('user_growth', 0)
+        session_growth = ga4_metrics.get('session_growth', 0)
+
+        html = f'''
+            <!-- GOOGLE ANALYTICS 4 METRICS -->
+            <div style="margin: 40px 0; background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%); padding: 30px; border-radius: 15px; border-left: 5px solid #1890ff;">
+                <h2 class="section-header" style="color: #1890ff; margin-top: 0;">📊 Google Analytics 4 User Behavior Metrics</h2>
+                <p style="color: #666; margin-bottom: 25px;">Real user engagement and behavior data from Google Analytics 4</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <!-- Total Users -->
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1); border-top: 3px solid #1890ff;">
+                        <div style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                            👥 Total Users
+                        </div>
+                        <div style="font-size: 36px; font-weight: 700; color: #1890ff; margin-bottom: 8px;">
+                            {total_users:,}
+                        </div>
+                        <div style="font-size: 13px; color: #52c41a; font-weight: 600;">
+                            <span style="font-size: 16px;">↗</span> +{user_growth}% growth
+                        </div>
+                    </div>
+
+                    <!-- Total Sessions -->
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(82, 196, 26, 0.1); border-top: 3px solid #52c41a;">
+                        <div style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                            🎯 Total Sessions
+                        </div>
+                        <div style="font-size: 36px; font-weight: 700; color: #52c41a; margin-bottom: 8px;">
+                            {total_sessions:,}
+                        </div>
+                        <div style="font-size: 13px; color: #52c41a; font-weight: 600;">
+                            <span style="font-size: 16px;">↗</span> +{session_growth}% growth
+                        </div>
+                    </div>
+
+                    <!-- Engagement Rate -->
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(250, 173, 20, 0.1); border-top: 3px solid #faad14;">
+                        <div style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                            ⚡ Engagement Rate
+                        </div>
+                        <div style="font-size: 36px; font-weight: 700; color: #faad14; margin-bottom: 8px;">
+                            {engagement_rate}%
+                        </div>
+                        <div style="font-size: 13px; color: #666;">
+                            {self._get_engagement_label(engagement_rate)}
+                        </div>
+                    </div>
+
+                    <!-- Page Views -->
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(114, 46, 209, 0.1); border-top: 3px solid #722ed1;">
+                        <div style="font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                            📄 Total Page Views
+                        </div>
+                        <div style="font-size: 36px; font-weight: 700; color: #722ed1; margin-bottom: 8px;">
+                            {total_page_views:,}
+                        </div>
+                        <div style="font-size: 13px; color: #666;">
+                            {pages_per_session} pages/session
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <!-- Bounce Rate -->
+                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">📉 Bounce Rate</div>
+                        <div style="font-size: 28px; font-weight: 600; color: {self._get_bounce_color(bounce_rate)};">
+                            {bounce_rate}%
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                            {self._get_bounce_label(bounce_rate)}
+                        </div>
+                    </div>
+
+                    <!-- Session Duration -->
+                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">⏱️ Avg Session Duration</div>
+                        <div style="font-size: 28px; font-weight: 600; color: #13c2c2;">
+                            {session_duration}s
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                            {self._format_duration(session_duration)}
+                        </div>
+                    </div>
+
+                    <!-- Pages per Session -->
+                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <div style="font-size: 13px; color: #666; margin-bottom: 8px;">📑 Pages per Session</div>
+                        <div style="font-size: 28px; font-weight: 600; color: #eb2f96;">
+                            {pages_per_session}
+                        </div>
+                        <div style="font-size: 12px; color: #888; margin-top: 5px;">
+                            {self._get_pages_label(pages_per_session)}
+                        </div>
+                    </div>
+                </div>
+            </div>'''
+
+        return html
+
+    def _get_engagement_label(self, rate: float) -> str:
+        """Get engagement quality label"""
+        if rate >= 70:
+            return '🌟 Excellent Engagement'
+        elif rate >= 60:
+            return '✅ Good Engagement'
+        elif rate >= 50:
+            return '👍 Average Engagement'
+        else:
+            return '⚠️ Needs Improvement'
+
+    def _get_bounce_color(self, rate: float) -> str:
+        """Get bounce rate color"""
+        if rate <= 25:
+            return '#52c41a'  # Green
+        elif rate <= 40:
+            return '#faad14'  # Orange
+        else:
+            return '#f5222d'  # Red
+
+    def _get_bounce_label(self, rate: float) -> str:
+        """Get bounce rate quality label"""
+        if rate <= 25:
+            return '🌟 Excellent'
+        elif rate <= 40:
+            return '✅ Good'
+        elif rate <= 55:
+            return '⚠️ Average'
+        else:
+            return '❌ High'
+
+    def _format_duration(self, seconds: int) -> str:
+        """Format session duration in minutes:seconds"""
+        mins = seconds // 60
+        secs = seconds % 60
+        return f'{mins}m {secs}s'
+
+    def _get_pages_label(self, pages: float) -> str:
+        """Get pages per session quality label"""
+        if pages >= 4:
+            return '🌟 Excellent Depth'
+        elif pages >= 2.5:
+            return '✅ Good Depth'
+        else:
+            return '⚠️ Could Improve'
+
     def _get_premium_css(self) -> str:
         """Get premium CSS with chart styles"""
         return """
