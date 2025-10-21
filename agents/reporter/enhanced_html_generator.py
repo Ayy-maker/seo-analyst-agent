@@ -19,6 +19,7 @@ from industry_detector import industry_detector
 from demo_data_generator import demo_data_generator
 from prioritization_engine import prioritization_engine
 from competitive_benchmarks import competitive_benchmarks
+from snapshot_manager import snapshot_manager
 
 
 class EnhancedHTMLGenerator:
@@ -38,7 +39,8 @@ class EnhancedHTMLGenerator:
                             company_name: str = "Sample Company",
                             report_period: str = "Monthly Report",
                             seo_data: Dict[str, Any] = None,
-                            filename: str = None) -> str:
+                            filename: str = None,
+                            client_id: int = None) -> str:
         """Generate complete enhanced HTML report with charts"""
 
         if filename is None:
@@ -50,14 +52,18 @@ class EnhancedHTMLGenerator:
         # Use default data if none provided - NOW WITH INDUSTRY INTELLIGENCE
         if seo_data is None:
             seo_data = self._get_default_data(company_name)
-        
+
+        # Add historical trend data if client_id is provided
+        if client_id is not None:
+            seo_data = self._add_historical_trends(seo_data, client_id)
+
         # Generate HTML with Chart.js
         html_content = self._generate_enhanced_html(company_name, report_period, seo_data)
-        
+
         # Write to file
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
-        
+
         # Return absolute path
         return str(output_path.resolve())
     
@@ -150,10 +156,11 @@ class EnhancedHTMLGenerator:
 
         return {
             'kpis': {
-                'total_clicks': {'value': totals['clicks'], 'change': 286, 'prev': int(totals['clicks'] * 0.26)},
-                'impressions': {'value': totals['impressions'], 'change': 412, 'prev': int(totals['impressions'] * 0.20)},
-                'ctr': {'value': totals['ctr'], 'change': 25, 'prev': round(totals['ctr'] * 0.8, 2)},
-                'avg_position': {'value': totals['avg_position'], 'change': 40, 'prev': round(totals['avg_position'] * 1.67, 1)}
+                # Real data only - no fabricated changes until we have historical tracking
+                'total_clicks': {'value': totals['clicks'], 'change': None, 'prev': None},
+                'impressions': {'value': totals['impressions'], 'change': None, 'prev': None},
+                'ctr': {'value': totals['ctr'], 'change': None, 'prev': None},
+                'avg_position': {'value': totals['avg_position'], 'change': None, 'prev': None}
             },
             'phase3': {
                 'prioritized_recommendations': prioritized_recs,
@@ -215,18 +222,55 @@ class EnhancedHTMLGenerator:
                 }
                 for month in demo_dataset['historical']
             ],
-            'progress': [
-                {'metric': 'Total Clicks', 'previous': 67, 'current': 258, 'change': '+191', 'growth': '+286%'},
-                {'metric': 'Total Impressions', 'previous': '1,698', 'current': '8,701', 'change': '+7,003', 'growth': '+412%'},
-                {'metric': 'Click-Through Rate', 'previous': '2.4%', 'current': '3.0%', 'change': '+0.6%', 'growth': '+25%'},
-                {'metric': 'Average Position', 'previous': 30.7, 'current': 18.4, 'change': '-12.3', 'growth': '+40%'},
-                {'metric': 'Active Users (GA4)', 'previous': 46, 'current': 161, 'change': '+115', 'growth': '+250%'},
-                {'metric': 'Page Views', 'previous': 180, 'current': 654, 'change': '+474', 'growth': '+263%'},
-                {'metric': 'Engagement Rate', 'previous': '38.2%', 'current': '51.9%', 'change': '+13.7%', 'growth': '+36%'},
-                {'metric': 'Site Health Score', 'previous': '72%', 'current': '87%', 'change': '+15%', 'growth': '+21%'},
-            ]
+            'progress': []  # No fake progress data - will show real trends once we have historical data
         }
-    
+
+    def _add_historical_trends(self, seo_data: Dict[str, Any], client_id: int) -> Dict[str, Any]:
+        """Add historical trend data from monthly snapshots if available"""
+
+        # Check if client has historical data
+        if not snapshot_manager.has_historical_data(client_id):
+            return seo_data
+
+        snapshot_count = snapshot_manager.get_snapshot_count(client_id)
+
+        # Need at least 2 snapshots for meaningful trends
+        if snapshot_count < 2:
+            return seo_data
+
+        # Fetch last 12 months of snapshots
+        snapshots = snapshot_manager.get_snapshots(client_id, months=12)
+
+        if not snapshots:
+            return seo_data
+
+        # Reverse to get oldest first (for chronological order in charts)
+        snapshots.reverse()
+
+        # Build monthly_progress data from snapshots
+        monthly_progress = []
+        for snapshot in snapshots:
+            month_name = datetime.strptime(snapshot['snapshot_month'], '%Y-%m').strftime('%B %Y')
+            monthly_progress.append({
+                'month': month_name,
+                'clicks': snapshot['total_clicks'],
+                'impressions': snapshot['total_impressions'],
+                'ctr': snapshot['avg_ctr'],
+                'position': snapshot['avg_position'],
+                'users': snapshot['total_users'],
+                'sessions': snapshot['total_sessions']
+            })
+
+        # Add to seo_data
+        if not seo_data:
+            seo_data = {}
+
+        seo_data['monthly_progress'] = monthly_progress
+        seo_data['has_historical_data'] = True
+        seo_data['snapshot_count'] = snapshot_count
+
+        return seo_data
+
     def _generate_enhanced_html(self, company_name: str, report_period: str, data: Dict) -> str:
         """Generate enhanced HTML with Chart.js visualizations"""
         
@@ -270,69 +314,58 @@ class EnhancedHTMLGenerator:
             <div class="executive-summary">
                 <h2>📊 Executive Summary</h2>
                 <p>
-                    Over the reporting period, <strong>{company_name}</strong> has achieved remarkable SEO growth through strategic optimization efforts.
-                    The website has experienced a <strong>{data['kpis']['total_clicks']['change']}% increase in organic traffic</strong>, with total clicks
-                    growing from {data['kpis']['total_clicks']['prev']} to {data['kpis']['total_clicks']['value']} per month. Our comprehensive approach
-                    combining technical SEO, content optimization, and user experience improvements has significantly improved search visibility.
-                    <strong>Impressions have surged by {data['kpis']['impressions']['change']}%</strong>, indicating substantially improved search presence.
+                    This baseline report for <strong>{company_name}</strong> provides a comprehensive snapshot of current SEO performance
+                    based on the most recent 30-day period. The website achieved <strong>{data['kpis']['total_clicks']['value']} total clicks</strong>
+                    and <strong>{data['kpis']['impressions']['value']:,} impressions</strong> from organic search.
+                    This data establishes a performance baseline for tracking future improvements. The current average click-through rate
+                    of <strong>{data['kpis']['ctr']['value']:.2f}%</strong> and average position of <strong>{data['kpis']['avg_position']['value']:.1f}</strong>
+                    provide key metrics for optimization opportunities.
                 </p>
             </div>
 
             <div class="kpi-dashboard">
                 <div class="kpi-card">
-                    <div class="kpi-label">Total Clicks</div>
+                    <div class="kpi-label">Total Clicks (30 days)</div>
                     <div class="kpi-value" data-target="{data['kpis']['total_clicks']['value']}">0</div>
-                    <div class="kpi-trend">
-                        <span class="arrow">↗</span> +{data['kpis']['total_clicks']['change']}% vs previous period
+                    <div class="kpi-trend" style="color: #718096;">
+                        Baseline Period
                     </div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-label">Total Impressions</div>
+                    <div class="kpi-label">Total Impressions (30 days)</div>
                     <div class="kpi-value" data-target="{data['kpis']['impressions']['value'] / 1000:.1f}">0</div>
-                    <div class="kpi-trend">
-                        <span class="arrow">↗</span> +{data['kpis']['impressions']['change']}% growth
+                    <div class="kpi-trend" style="color: #718096;">
+                        {data['kpis']['impressions']['value']:,} total
                     </div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-label">Click-Through Rate</div>
                     <div class="kpi-value" data-target="{data['kpis']['ctr']['value']}">0</div>
-                    <div class="kpi-trend">
-                        <span class="arrow">↗</span> +{data['kpis']['ctr']['change']}% improvement
+                    <div class="kpi-trend" style="color: #718096;">
+                        Current Performance
                     </div>
                 </div>
                 <div class="kpi-card">
                     <div class="kpi-label">Average Position</div>
                     <div class="kpi-value" data-target="{data['kpis']['avg_position']['value']}">0</div>
-                    <div class="kpi-trend">
-                        <span class="arrow">↗</span> +{data['kpis']['avg_position']['change']}% positions gained
+                    <div class="kpi-trend" style="color: #718096;">
+                        Current Ranking
                     </div>
                 </div>
             </div>
 
             {self._build_ga4_metrics_section(data.get('ga4_metrics', {}))}
 
-            <!-- MONTH-OVER-MONTH GROWTH CHARTS -->
-            <h2 class="section-header">📈 Month-Over-Month Growth</h2>
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <h3>Clicks Trend</h3>
-                    <canvas id="clicksChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Health Score Progress</h3>
-                    <canvas id="healthChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="charts-grid" style="margin-top: 20px;">
-                <div class="chart-card">
-                    <h3>Impressions Growth (in thousands)</h3>
-                    <canvas id="impressionsChart"></canvas>
-                </div>
-                <div class="chart-card">
-                    <h3>Position Improvement</h3>
-                    <canvas id="positionChart"></canvas>
-                </div>
+            <!-- BASELINE NOTICE -->
+            <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 30px; border-radius: 15px; border-left: 5px solid #0284c7; margin: 40px 0;">
+                <h2 style="color: #0284c7; margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px;">
+                    📊 Baseline Report - Historical Tracking Starts Next Month
+                </h2>
+                <p style="color: #0c4a6e; font-size: 15px; line-height: 1.6; margin: 0;">
+                    This is your <strong>baseline performance report</strong>. Starting next month, you'll see month-over-month trend charts
+                    showing clicks, impressions, CTR, and position changes over time. This baseline establishes your starting point for
+                    measuring SEO improvements.
+                </p>
             </div>
 
             <h2 class="section-header">🔍 Top Performing Search Queries</h2>
@@ -374,21 +407,7 @@ class EnhancedHTMLGenerator:
 {device_cards_html}
             </div>
 
-            <h2 class="section-header">📊 Progress Comparison</h2>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Previous Period</th>
-                        <th>Current Period</th>
-                        <th>Change</th>
-                        <th>Growth Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-{progress_html}
-                </tbody>
-            </table>
+            <!-- Progress Comparison removed - will be enabled once historical tracking is implemented -->
 
             <!-- PHASE 3: PRIORITIZED RECOMMENDATIONS -->
             <div class="recommendations">
@@ -404,29 +423,7 @@ class EnhancedHTMLGenerator:
             <!-- PHASE 3: COMPETITIVE BENCHMARKING -->
             {self._build_competitive_benchmarking_html(data.get('phase3', {}).get('competitive_benchmarks', {}))}
 
-            <h2 class="section-header">🎯 Performance Insights</h2>
-            <div class="insights-grid">
-                <div class="insights-box strengths">
-                    <h3>💪 Key Strengths</h3>
-                    <ul>
-                        <li><strong>Brand Authority:</strong> Strong brand recognition and top rankings for branded search terms.</li>
-                        <li><strong>Mobile-First Success:</strong> Exceptional mobile performance aligning with user search behavior.</li>
-                        <li><strong>Site Health Excellence:</strong> High site health score indicating robust technical foundation.</li>
-                        <li><strong>Content Quality:</strong> Well-optimized content establishing topical authority.</li>
-                        <li><strong>Traffic Growth:</strong> Consistent month-over-month organic traffic increases.</li>
-                    </ul>
-                </div>
-                <div class="insights-box improvements">
-                    <h3>📈 Growth Opportunities</h3>
-                    <ul>
-                        <li><strong>CTR Enhancement:</strong> Optimize meta descriptions with compelling CTAs and value propositions.</li>
-                        <li><strong>Position Advancement:</strong> Target top 10 positions for high-priority keywords.</li>
-                        <li><strong>Desktop Experience:</strong> Optimize for users on larger screens researching higher-value actions.</li>
-                        <li><strong>Content Depth:</strong> Expand content to address user intent more comprehensively.</li>
-                        <li><strong>Conversion Tracking:</strong> Implement enhanced tracking for better ROI measurement.</li>
-                    </ul>
-                </div>
-            </div>
+            {self._build_performance_insights_html(data)}
 
             <h2 class="section-header">✅ SEO Deliverables Completed</h2>
             <div class="recommendations" style="background: linear-gradient(135deg, #48bb7815 0%, #48bb7825 100%); border-left-color: #48bb78;">
@@ -460,8 +457,8 @@ class EnhancedHTMLGenerator:
         const impressionsData = {json.dumps(impressions_data)};
         const healthData = {json.dumps(health_data)};
         const positionData = {json.dumps(position_data)};
-        
-        {self._get_chartjs_code()}
+
+        {self._get_chartjs_code(data)}
         {self._get_animation_code()}
     </script>
 </body>
@@ -469,6 +466,16 @@ class EnhancedHTMLGenerator:
     
     def _build_queries_table(self, queries: List[Dict]) -> str:
         """Build top queries table HTML"""
+        if not queries:
+            return """
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #718096;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+                            <strong>No query data available yet</strong><br>
+                            <span style="font-size: 14px;">Query data will appear once Google Search Console has sufficient data to display.</span>
+                        </td>
+                    </tr>"""
+
         html = ""
         for query in queries:
             perf_class = query['performance'].lower().replace(' ', '-')
@@ -486,12 +493,22 @@ class EnhancedHTMLGenerator:
     
     def _build_landing_pages_table(self, pages: List[Dict]) -> str:
         """Build landing pages table HTML"""
+        if not pages:
+            return """
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #718096;">
+                            <div style="font-size: 48px; margin-bottom: 10px;">📄</div>
+                            <strong>No landing page data available yet</strong><br>
+                            <span style="font-size: 14px;">Landing page performance will appear once traffic data is collected.</span>
+                        </td>
+                    </tr>"""
+
         html = ""
         for page in pages:
             html += f"""
                     <tr>
                         <td><strong>{page['url']}</strong> ({page['label']})</td>
-                        <td>{page['clicks']} <span class="metric-change positive">+{page['change']}%</span></td>
+                        <td>{page['clicks']}</td>
                         <td>{page['impressions']:,}</td>
                         <td>{page['ctr']}%</td>
                         <td>{page['position']}</td>
@@ -500,6 +517,14 @@ class EnhancedHTMLGenerator:
     
     def _build_device_cards(self, devices: List[Dict]) -> str:
         """Build device cards HTML"""
+        if not devices:
+            return """
+                <div style="text-align: center; padding: 60px 40px; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                    <div style="font-size: 64px; margin-bottom: 20px;">📱💻📟</div>
+                    <h3 style="color: #2d3748; margin-bottom: 10px;">No device data available yet</h3>
+                    <p style="color: #718096; font-size: 15px;">Device distribution will appear once traffic data is collected from multiple device types.</p>
+                </div>"""
+
         html = ""
         for device in devices:
             html += f"""
@@ -528,6 +553,89 @@ class EnhancedHTMLGenerator:
                     </tr>"""
         return html
 
+    def _build_performance_insights_html(self, data: Dict[str, Any]) -> str:
+        """Build data-driven performance insights or skip if insufficient data"""
+
+        # Get KPI data
+        kpis = data.get('kpis', {})
+        total_clicks = kpis.get('total_clicks', {}).get('value', 0)
+        avg_position = kpis.get('avg_position', {}).get('value', 100)
+        avg_ctr = kpis.get('ctr', {}).get('value', 0)
+
+        # If we have very low data (< 10 clicks) or very poor position (> 50),
+        # show a focused "baseline" message instead of generic strengths
+        if total_clicks < 10 or avg_position > 50:
+            return f"""
+            <h2 class="section-header">🎯 Baseline Performance Analysis</h2>
+            <div style="background: linear-gradient(135deg, #f39c1215 0%, #f39c1225 100%); border-left: 5px solid #f39c12; padding: 30px; border-radius: 10px; margin-bottom: 40px;">
+                <h3 style="color: #f39c12; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    📊 Current Status: Building SEO Foundation
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div>
+                        <h4 style="color: #2d3748; margin-bottom: 10px;">📌 What This Baseline Tells Us:</h4>
+                        <ul style="list-style: none; padding: 0; color: #4a5568;">
+                            <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                                <span style="position: absolute; left: 0;">•</span>
+                                Current visibility: Position {avg_position:.1f} (Page {int(avg_position/10) + 1})
+                            </li>
+                            <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                                <span style="position: absolute; left: 0;">•</span>
+                                Traffic level: {total_clicks} clicks in 30 days (early stage)
+                            </li>
+                            <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                                <span style="position: absolute; left: 0;">•</span>
+                                CTR: {avg_ctr:.2f}% (typical for positions beyond page 1)
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="color: #2d3748; margin-bottom: 10px;">🎯 Immediate Focus Areas:</h4>
+                        <ul style="list-style: none; padding: 0; color: #4a5568;">
+                            <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                                <span style="position: absolute; left: 0;">1.</span>
+                                <strong>Improve Rankings:</strong> Target page 1-2 positions (1-20)
+                            </li>
+                            <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                                <span style="position: absolute; left: 0;">2.</span>
+                                <strong>Expand Keywords:</strong> Increase number of ranking queries
+                            </li>
+                            <li style="padding: 8px 0; padding-left: 25px; position: relative;">
+                                <span style="position: absolute; left: 0;">3.</span>
+                                <strong>Content Optimization:</strong> Enhance existing pages for better relevance
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.6); border-radius: 8px;">
+                    <strong style="color: #2d3748;">💡 Next Steps:</strong> Focus on ranking improvements and content optimization.
+                    Historical trend tracking will show progress starting next month with month-over-month comparisons.
+                </div>
+            </div>"""
+
+        # If we have reasonable data, show standard insights
+        return """
+            <h2 class="section-header">🎯 Performance Insights</h2>
+            <div class="insights-grid">
+                <div class="insights-box strengths">
+                    <h3>💪 Key Strengths</h3>
+                    <ul>
+                        <li><strong>Established Presence:</strong> Website indexed and appearing in search results.</li>
+                        <li><strong>Technical Foundation:</strong> Site accessible and crawlable by search engines.</li>
+                        <li><strong>Growth Tracking:</strong> Historical tracking now enabled for month-over-month progress measurement.</li>
+                    </ul>
+                </div>
+                <div class="insights-box improvements">
+                    <h3>📈 Growth Opportunities</h3>
+                    <ul>
+                        <li><strong>Ranking Improvement:</strong> Target higher positions for better visibility and traffic.</li>
+                        <li><strong>Content Enhancement:</strong> Expand and optimize content to address user intent comprehensively.</li>
+                        <li><strong>CTR Optimization:</strong> Improve meta descriptions and titles for higher click-through rates.</li>
+                        <li><strong>Keyword Expansion:</strong> Identify and target additional relevant search queries.</li>
+                    </ul>
+                </div>
+            </div>"""
+
     def _build_prioritized_recommendations_html(self, recommendations: List[Dict]) -> str:
         """Build Phase 3 prioritized recommendations HTML"""
         if not recommendations:
@@ -543,11 +651,28 @@ class EnhancedHTMLGenerator:
             effort_score = rec.get('effort_score', 0)
             roi_score = rec.get('roi_score', 0)
 
+            # Extract title and description from AI recommendation format
+            recommendation_main = rec.get('recommendation', rec.get('description', rec.get('title', 'Recommendation')))
+            # Use first 100 chars as title
+            title_text = recommendation_main[:100] + '...' if len(recommendation_main) > 100 else recommendation_main
+
+            # Build comprehensive description from all AI fields
+            description_parts = [recommendation_main]
+            if rec.get('reasoning'):
+                description_parts.append(f"<br><br><strong>Why:</strong> {rec['reasoning']}")
+            if rec.get('data_evidence'):
+                evidence_list = '<br>'.join([f"• {item}" for item in rec['data_evidence'][:3]])  # Top 3 evidence
+                description_parts.append(f"<br><br><strong>Data Evidence:</strong><br>{evidence_list}")
+            recommendation_text = ''.join(description_parts)
+
+            # Get impact estimate
+            impact_text = rec.get('impact_estimate', rec.get('expected_impact', 'Estimated improvement in SEO performance'))
+
             html += f'''
                 <div class="recommendation-card">
                     <div class="rec-header">
                         <div class="rec-title">
-                            <h3>{rec.get('title', 'Recommendation')}</h3>
+                            <h3>{title_text}</h3>
                             <span class="priority-badge {priority_class}">{priority}</span>
                         </div>
                         <div class="rec-score">
@@ -555,7 +680,7 @@ class EnhancedHTMLGenerator:
                             <div class="score-label">Priority Score</div>
                         </div>
                     </div>
-                    <p class="rec-description">{rec.get('description', '')}</p>
+                    <p class="rec-description">{recommendation_text}</p>
                     <div class="rec-metrics">
                         <div class="metric">
                             <span class="metric-label">Impact</span>
@@ -575,7 +700,7 @@ class EnhancedHTMLGenerator:
                         </div>
                     </div>
                     <div class="rec-impact">
-                        <strong>Expected Impact:</strong> {rec.get('expected_impact', 'N/A')}
+                        <strong>Expected Impact:</strong> {impact_text}
                     </div>
                 </div>'''
 
@@ -690,8 +815,8 @@ class EnhancedHTMLGenerator:
                         <div style="font-size: 36px; font-weight: 700; color: #1890ff; margin-bottom: 8px;">
                             {total_users:,}
                         </div>
-                        <div style="font-size: 13px; color: #52c41a; font-weight: 600;">
-                            <span style="font-size: 16px;">↗</span> +{user_growth}% growth
+                        <div style="font-size: 13px; color: #718096; font-weight: 600;">
+                            30-day baseline
                         </div>
                     </div>
 
@@ -703,8 +828,8 @@ class EnhancedHTMLGenerator:
                         <div style="font-size: 36px; font-weight: 700; color: #52c41a; margin-bottom: 8px;">
                             {total_sessions:,}
                         </div>
-                        <div style="font-size: 13px; color: #52c41a; font-weight: 600;">
-                            <span style="font-size: 16px;">↗</span> +{session_growth}% growth
+                        <div style="font-size: 13px; color: #718096; font-weight: 600;">
+                            30-day baseline
                         </div>
                     </div>
 
@@ -1612,209 +1737,124 @@ class EnhancedHTMLGenerator:
         }
         """
     
-    def _get_chartjs_code(self) -> str:
-        """Get Chart.js initialization code"""
-        return """
-        // Clicks Trend Chart
-        new Chart(document.getElementById('clicksChart'), {
-            type: 'line',
-            data: {
-                labels: chartMonths,
-                datasets: [{
-                    label: 'Clicks',
-                    data: clicksData,
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 6,
-                    pointBackgroundColor: '#667eea',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#2d3748',
-                        padding: 12,
-                        titleFont: {
-                            size: 14,
-                            weight: 'bold'
-                        },
-                        bodyFont: {
-                            size: 13
-                        },
-                        cornerRadius: 8
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#e2e8f0'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
+    def _get_chartjs_code(self, data: Dict[str, Any]) -> str:
+        """Get Chart.js initialization code - Now with real historical data support"""
 
-        // Health Score Chart
-        new Chart(document.getElementById('healthChart'), {
-            type: 'bar',
-            data: {
-                labels: chartMonths,
-                datasets: [{
-                    label: 'Health Score',
-                    data: healthData,
-                    backgroundColor: 'rgba(72, 187, 120, 0.8)',
-                    borderColor: '#48bb78',
-                    borderWidth: 2,
-                    borderRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#2d3748',
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: {
-                            color: '#e2e8f0'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
+        # Check if we have historical data
+        if not data.get('has_historical_data', False) or not data.get('monthly_progress'):
+            return """
+            // Historical trend charts will be enabled once we have multiple months of data
+            // For now, showing baseline report only
+            console.log('Baseline report generated. Historical charts will appear next month.');
+            """
 
-        // Impressions Chart
-        new Chart(document.getElementById('impressionsChart'), {
-            type: 'line',
-            data: {
-                labels: chartMonths,
-                datasets: [{
-                    label: 'Impressions (K)',
-                    data: impressionsData,
-                    borderColor: '#f39c12',
-                    backgroundColor: 'rgba(243, 156, 18, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 6,
-                    pointBackgroundColor: '#f39c12',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#2d3748',
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#e2e8f0'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
+        # Extract trend data
+        monthly_progress = data.get('monthly_progress', [])
+        months = [m['month'] for m in monthly_progress]
+        clicks_data = [m['clicks'] for m in monthly_progress]
+        impressions_data = [m['impressions']/1000 for m in monthly_progress]  # In thousands
+        position_data = [m['position'] for m in monthly_progress]
+        users_data = [m.get('users', 0) for m in monthly_progress]
+        sessions_data = [m.get('sessions', 0) for m in monthly_progress]
 
-        // Position Chart (inverted - lower is better)
-        new Chart(document.getElementById('positionChart'), {
-            type: 'line',
-            data: {
-                labels: chartMonths,
-                datasets: [{
-                    label: 'Average Position',
-                    data: positionData,
-                    borderColor: '#764ba2',
-                    backgroundColor: 'rgba(118, 75, 162, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 6,
-                    pointBackgroundColor: '#764ba2',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: '#2d3748',
-                        padding: 12,
-                        cornerRadius: 8,
-                        callbacks: {
-                            label: function(context) {
-                                return 'Position: ' + context.parsed.y.toFixed(1);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        reverse: true,
-                        grid: {
-                            color: '#e2e8f0'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
+        # Generate Chart.js code with real data
+        return f"""
+        // Chart.js - Historical Trend Visualizations
+        const chartConfig = {{
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {{
+                legend: {{
+                    display: true,
+                    position: 'bottom'
+                }},
+                tooltip: {{
+                    mode: 'index',
+                    intersect: false
+                }}
+            }},
+            scales: {{
+                y: {{
+                    beginAtZero: true
+                }}
+            }}
+        }};
+
+        // Clicks & Impressions Chart
+        if (document.getElementById('trendsChart')) {{
+            new Chart(document.getElementById('trendsChart'), {{
+                type: 'line',
+                data: {{
+                    labels: {json.dumps(months)},
+                    datasets: [{{
+                        label: 'Clicks',
+                        data: {json.dumps(clicks_data)},
+                        borderColor: '#FF6384',
+                        backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                        tension: 0.4
+                    }}, {{
+                        label: 'Impressions (K)',
+                        data: {json.dumps(impressions_data)},
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        tension: 0.4
+                    }}]
+                }},
+                options: chartConfig
+            }});
+        }}
+
+        // Average Position Chart (inverted - lower is better)
+        if (document.getElementById('positionChart')) {{
+            new Chart(document.getElementById('positionChart'), {{
+                type: 'line',
+                data: {{
+                    labels: {json.dumps(months)},
+                    datasets: [{{
+                        label: 'Average Position',
+                        data: {json.dumps(position_data)},
+                        borderColor: '#FFCE56',
+                        backgroundColor: 'rgba(255, 206, 86, 0.1)',
+                        tension: 0.4
+                    }}]
+                }},
+                options: {{
+                    ...chartConfig,
+                    scales: {{
+                        y: {{
+                            reverse: true,  // Lower position is better
+                            beginAtZero: false
+                        }}
+                    }}
+                }}
+            }});
+        }}
+
+        // Users & Sessions Chart
+        if (document.getElementById('usersChart')) {{
+            new Chart(document.getElementById('usersChart'), {{
+                type: 'bar',
+                data: {{
+                    labels: {json.dumps(months)},
+                    datasets: [{{
+                        label: 'Users',
+                        data: {json.dumps(users_data)},
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: '#4BC0C0',
+                        borderWidth: 2
+                    }}, {{
+                        label: 'Sessions',
+                        data: {json.dumps(sessions_data)},
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                        borderColor: '#9966FF',
+                        borderWidth: 2
+                    }}]
+                }},
+                options: chartConfig
+            }});
+        }}
+
+        console.log('Historical trend charts loaded successfully!');
         """
     
     def _get_animation_code(self) -> str:

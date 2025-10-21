@@ -1,0 +1,18 @@
+[Unit]
+Description=SEO Snapshot Monthly Capture Timer
+Documentation=https://seo.theprofitplatform.com.au
+Requires=seo-snapshot-capture.service
+
+[Timer]
+# Run on the 1st of each month at 2:00 AM UTC
+OnCalendar=monthly
+# Equivalent to: *-*-01 02:00:00
+
+# If the system was off when the timer should have triggered, run it as soon as possible
+Persistent=true
+
+# Randomize execution time by up to 1 hour to avoid load spikes
+RandomizedDelaySec=3600
+
+[Install]
+WantedBy=timers.target

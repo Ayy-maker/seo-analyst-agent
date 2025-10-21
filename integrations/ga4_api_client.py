@@ -54,7 +54,13 @@ class GA4APIClient:
         self.config_path = self.credentials_dir / 'ga4_config.json'
         self.service_account_path = Path(service_account_file) if service_account_file else (self.credentials_dir / 'service_account.json')
 
-        self.property_id = property_id or self._load_property_id()
+        # Format property ID correctly
+        raw_property_id = property_id or self._load_property_id()
+        if raw_property_id and not raw_property_id.startswith('properties/'):
+            self.property_id = f'properties/{raw_property_id}'
+        else:
+            self.property_id = raw_property_id
+
         self.credentials = None
         self.client = None
         self.auth_method = None  # 'oauth' or 'service_account'

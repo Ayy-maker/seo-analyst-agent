@@ -61,8 +61,10 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Outputs (optional - may want to keep samples)
-# outputs/
+# Outputs - Generated files only (keep directory structure)
+outputs/html-reports/*.html
+outputs/merged-data-*.json
+outputs/notifications/
 
 # Google API Credentials (NEVER COMMIT!)
 config/credentials/*.json

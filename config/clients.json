@@ -1,0 +1,30 @@
+{
+  "hot_tyres": {
+    "name": "Hot Tyres",
+    "domain": "hottyres.com.au",
+    "website": "https://www.hottyres.com.au",
+    "ga4_property_id": "487936109",
+    "gsc_property": "https://www.hottyres.com.au/"
+  },
+  "the_profit_platform": {
+    "name": "The Profit Platform",
+    "domain": "theprofitplatform.com.au",
+    "website": "https://theprofitplatform.com.au",
+    "ga4_property_id": "500340846",
+    "gsc_property": "sc-domain:theprofitplatform.com.au"
+  },
+  "instant_auto_traders": {
+    "name": "Instant Auto Traders",
+    "domain": "instantautotraders.com.au",
+    "website": "https://instantautotraders.com.au",
+    "ga4_property_id": "496897015",
+    "gsc_property": "https://instantautotraders.com.au/"
+  },
+  "sadc_disability_services": {
+    "name": "SADC Disability Services",
+    "domain": "sadcdisabilityservices.com.au",
+    "website": "https://sadcdisabilityservices.com.au",
+    "ga4_property_id": "499372671",
+    "gsc_property": "https://sadcdisabilityservices.com.au/"
+  }
+}

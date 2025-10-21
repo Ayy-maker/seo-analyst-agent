@@ -311,11 +311,29 @@ def upload_batch():
                 # GA4 only - we'll pass ga4_metrics to generator which can handle it
                 normalized_data = {'ga4_metrics': ga4_metrics}
 
+            # PHASE 3: Generate strategic recommendations with AI (if API key available)
+            if api_key and normalized_data:
+                try:
+                    from utils.prioritization_engine import prioritization_engine
+                    recommendations = analyst.generate_strategic_recommendations(normalized_data, company_name)
+                    prioritized_recs = prioritization_engine.prioritize_recommendations(recommendations)
+                    priority_summary = prioritization_engine.get_priority_summary(prioritized_recs)
+
+                    # Add Phase 3 data to normalized_data
+                    if 'phase3' not in normalized_data:
+                        normalized_data['phase3'] = {}
+                    normalized_data['phase3']['prioritized_recommendations'] = prioritized_recs
+                    normalized_data['phase3']['priority_summary'] = priority_summary
+                except Exception as e:
+                    print(f"Phase 3 generation failed: {e}")
+                    # Continue without Phase 3
+
             # Generate HTML report with REAL or DEMO data
             html_file = html_generator.generate_full_report(
                 company_name=company_name,
                 report_period=report_period,
-                seo_data=normalized_data  # Uses real data if available, otherwise demo
+                seo_data=normalized_data,  # Uses real data if available, otherwise demo
+                client_id=client_id  # Pass client_id for historical trend data
             )
             
             # Store HTML file path in database
@@ -512,11 +530,29 @@ def upload_file():
             # GA4 only - use demo GSC data but include GA4 metrics
             normalized_data = {'ga4_metrics': ga4_metrics}
 
+        # PHASE 3: Generate strategic recommendations with AI (if API key available)
+        if api_key and normalized_data:
+            try:
+                from utils.prioritization_engine import prioritization_engine
+                recommendations = analyst.generate_strategic_recommendations(normalized_data, company_name)
+                prioritized_recs = prioritization_engine.prioritize_recommendations(recommendations)
+                priority_summary = prioritization_engine.get_priority_summary(prioritized_recs)
+
+                # Add Phase 3 data to normalized_data
+                if 'phase3' not in normalized_data:
+                    normalized_data['phase3'] = {}
+                normalized_data['phase3']['prioritized_recommendations'] = prioritized_recs
+                normalized_data['phase3']['priority_summary'] = priority_summary
+            except Exception as e:
+                print(f"Phase 3 generation failed: {e}")
+                # Continue without Phase 3
+
         # Generate HTML report with REAL or DEMO data
         html_file = html_generator.generate_full_report(
             company_name=company_name,
             report_period=report_period,
-            seo_data=normalized_data  # Uses real data if available, otherwise demo
+            seo_data=normalized_data,  # Uses real data if available, otherwise demo
+            client_id=client_id  # Pass client_id for historical trend data
         )
         
         # Store HTML file path in database

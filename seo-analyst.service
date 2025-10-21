@@ -1,0 +1,19 @@
+[Unit]
+Description=SEO Analyst Agent - Intelligence Platform
+After=network.target
+
+[Service]
+Type=simple
+User=avi
+WorkingDirectory=/home/avi/projects/seoanalyst/seo-analyst-agent
+Environment="PATH=/home/avi/projects/seoanalyst/seo-analyst-agent/venv/bin:/usr/local/bin:/usr/bin:/bin"
+EnvironmentFile=/home/avi/projects/seoanalyst/seo-analyst-agent/.env
+ExecStart=/home/avi/projects/seoanalyst/seo-analyst-agent/venv/bin/python -c "from web.app import app; app.run(host='127.0.0.1', port=5002, debug=False)"
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=seo-analyst
+
+[Install]
+WantedBy=multi-user.target
