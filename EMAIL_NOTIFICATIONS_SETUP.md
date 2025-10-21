@@ -2,7 +2,7 @@
 
 **Date:** October 20, 2025
 **Status:** ✅ Configured (awaiting SMTP credentials)
-**Notification Email:** abhishekmaharjan3737@gmail.com
+**Notification Email:** ${NOTIFICATION_EMAIL}
 
 ---
 
@@ -17,7 +17,7 @@
    - Professional HTML email templates
 
 2. ✅ **Notification Email Configured**
-   - Target email: `abhishekmaharjan3737@gmail.com`
+   - Target email: `${NOTIFICATION_EMAIL}`
    - Set in `.env` file as `NOTIFICATION_EMAIL`
 
 3. ✅ **Test Notification Script** (`send_test_notification.py`)
@@ -73,7 +73,7 @@ source venv/bin/activate
 python send_test_notification.py
 ```
 
-This will send a test notification to `abhishekmaharjan3737@gmail.com`.
+This will send a test notification to `${NOTIFICATION_EMAIL}`.
 
 ---
 
@@ -99,7 +99,7 @@ python send_test_notification.py
 from utils.notification_service import notification_service
 
 notification_service.send_system_status(
-    recipient='abhishekmaharjan3737@gmail.com'
+    recipient='${NOTIFICATION_EMAIL}'
 )
 ```
 
@@ -127,7 +127,7 @@ snapshot_data = {
 notification_service.send_snapshot_notification(
     client_name='Hot Tyres',
     snapshot_data=snapshot_data,
-    recipient='abhishekmaharjan3737@gmail.com'
+    recipient='${NOTIFICATION_EMAIL}'
 )
 ```
 
@@ -146,7 +146,7 @@ from utils.notification_service import notification_service
 notification_service.send_report_notification(
     client_name='The Profit Platform',
     report_path='outputs/html-reports/seo-report-the-profit-platform-2025-10-20-150240.html',
-    recipient='abhishekmaharjan3737@gmail.com'
+    recipient='${NOTIFICATION_EMAIL}'
 )
 ```
 
@@ -165,7 +165,7 @@ from utils.notification_service import notification_service
 notification_service.send_snapshot_notification(
     client_name=client['name'],
     snapshot_data=snapshot_data,
-    recipient='abhishekmaharjan3737@gmail.com'
+    recipient='${NOTIFICATION_EMAIL}'
 )
 ```
 
@@ -180,7 +180,7 @@ from utils.notification_service import notification_service
 notification_service.send_report_notification(
     client_name=company_name,
     report_path=report_path,
-    recipient='abhishekmaharjan3737@gmail.com'
+    recipient='${NOTIFICATION_EMAIL}'
 )
 ```
 
@@ -239,7 +239,7 @@ from utils.notification_service import notification_service
 notification_service.send_notification(
     subject='Test',
     message='<h1>Test</h1>',
-    recipient='abhishekmaharjan3737@gmail.com'
+    recipient='${NOTIFICATION_EMAIL}'
 )
 ```
 
@@ -266,7 +266,7 @@ This means email credentials are not configured. Follow Steps 1-3 above to set u
 - ✅ `EMAIL_NOTIFICATIONS_SETUP.md` - This documentation
 
 ### Configuration:
-- ✅ `.env` - Added `NOTIFICATION_EMAIL=abhishekmaharjan3737@gmail.com`
+- ✅ `.env` - Added `NOTIFICATION_EMAIL=${NOTIFICATION_EMAIL}`
 
 ---
 
@@ -282,7 +282,7 @@ python send_test_notification.py
 ### Send System Status via CLI:
 ```bash
 source venv/bin/activate
-python -m utils.notification_service --status --to abhishekmaharjan3737@gmail.com
+python -m utils.notification_service --status --to ${NOTIFICATION_EMAIL}
 ```
 
 ### View Latest Notification:
@@ -301,7 +301,7 @@ curl https://seo.theprofitplatform.com.au/preview/outputs/notifications/notifica
 | Component | Status |
 |-----------|--------|
 | **Notification Service** | ✅ Implemented |
-| **Notification Email** | ✅ Configured (abhishekmaharjan3737@gmail.com) |
+| **Notification Email** | ✅ Configured (${NOTIFICATION_EMAIL}) |
 | **SMTP Credentials** | ⚠️ Not configured (follow steps above) |
 | **Test Notification** | ✅ Created and saved as HTML |
 | **HTML Preview** | ✅ Available online |

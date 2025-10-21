@@ -8,8 +8,8 @@ You've provided **API Keys**, which is great! However, for Google Search Console
 
 ## 📋 What You Provided (API Keys)
 
-✅ **Google Analytics API Key**: `AIzaSyCSIwK_YVE6yBzZy7-r2dNC1LyfA6eVfmY`
-✅ **Google Search Console API Key**: `AIzaSyBaEI319a5_NwxGnhjHp5K8piQSpw6rK40`
+✅ **Google Analytics API Key**: `AIzaSy...your-key-here...` (stored in .env)
+✅ **Google Search Console API Key**: `AIzaSy...your-key-here...` (stored in .env)
 
 **What API Keys Do**:
 - Identify your application to Google
@@ -120,7 +120,7 @@ response = service.searchanalytics().query(
     siteUrl='https://yoursite.com',
     body=request_body,
     # OAuth token used here (automatically by client library)
-    # API key used here: key='AIzaSyBaEI319a5_NwxGnhjHp5K8piQSpw6rK40'
+    # API key from environment: key=os.getenv('GSC_API_KEY')
 ).execute()
 ```
 
@@ -219,10 +219,10 @@ If you want to skip OAuth authorization, you can use a **Service Account**:
 ```json
 {
   "google_analytics": {
-    "api_key": "AIzaSyCSIwK_YVE6yBzZy7-r2dNC1LyfA6eVfmY"
+    "api_key": "YOUR_GA4_API_KEY_HERE"
   },
   "google_search_console": {
-    "api_key": "AIzaSyBaEI319a5_NwxGnhjHp5K8piQSpw6rK40"
+    "api_key": "YOUR_GSC_API_KEY_HERE"
   }
 }
 ```
